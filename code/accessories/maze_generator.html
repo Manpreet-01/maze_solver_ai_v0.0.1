@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Maze Editor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f4f5;
+            color: #18181b;
+
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+
+            padding: 30px;
+        }
+
+        .app {
+            width: min(100%, 1100px);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .description {
+            margin: 0 0 20px;
+            color: #71717a;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e4e4e7;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        button {
+            border: 1px solid #d4d4d8;
+            background: white;
+            color: #18181b;
+
+            padding: 9px 14px;
+            border-radius: 7px;
+
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #f4f4f5;
+        }
+
+        button.active {
+            background: #18181b;
+            color: white;
+            border-color: #18181b;
+        }
+
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .setting {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 8px;
+            border: 1px solid #d4d4d8;
+            border-radius: 6px;
+        }
+
+        .canvas-container {
+            background: white;
+            border: 1px solid #e4e4e7;
+            border-radius: 12px;
+
+            padding: 20px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            overflow: auto;
+        }
+
+        canvas {
+            display: block;
+            border: 1px solid #18181b;
+
+            /*
+             * Important for touch dragging.
+             */
+            touch-action: none;
+
+            cursor: crosshair;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .export-area {
+            display: grid;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 220px;
+
+            resize: vertical;
+
+            padding: 12px;
+
+            border: 1px solid #d4d4d8;
+            border-radius: 8px;
+
+            font-family: monospace;
+            font-size: 14px;
+
+            background: #18181b;
+            color: #fafafa;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: #71717a;
+            font-size: 14px;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+
+            margin-top: 15px;
+
+            color: #52525b;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .legend-box {
+            width: 18px;
+            height: 18px;
+
+            border: 1px solid #a1a1aa;
+        }
+
+        .legend-wall {
+            background: #18181b;
+        }
+
+        .legend-start {
+            background: #22c55e;
+        }
+
+        .legend-goal {
+            background: #ef4444;
+        }
+
+        .legend-path {
+            background: #facc15;
+        }
+
+        .hint {
+            margin-top: 12px;
+            padding: 10px 12px;
+
+            background: #fafafa;
+            border-radius: 7px;
+
+            color: #52525b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            .canvas-container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+
+/*        dark mode code starts*/
+
+        body, .panel, .hint, .canvas-container, input, button {
+            background: black !important;
+            color: white !important;
+        }
+        .tool.active  {
+            background: #2d2727 !important;
+        }
+/*        dark mode code ends*/
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <h1>Maze Editor</h1>
+
+    <p class="description">
+        Draw your maze on the canvas and export it as a JavaScript array.
+    </p>
+
+
+    <!-- TOOLBAR -->
+    <div class="panel">
+
+        <div class="toolbar">
+
+            <button
+                class="tool active"
+                data-tool="wall">
+                🧱 Wall
+            </button>
+
+            <button
+                class="tool"
+                data-tool="start">
+                🟢 Start
+            </button>
+
+            <button
+                class="tool"
+                data-tool="goal">
+                🔴 Goal
+            </button>
+
+            <button
+                class="tool"
+                data-tool="erase">
+                🧹 Erase
+            </button>
+
+            <button
+                class="tool"
+                data-tool="path">
+                🟡 Solution Path
+            </button>
+
+        </div>
+
+        <div class="hint">
+            Select a tool and click/drag across cells.
+            For walls and solution paths, you can hold the mouse button and paint continuously.
+        </div>
+
+    </div>
+
+
+    <!-- GRID SETTINGS -->
+    <div class="panel">
+
+        <div class="settings">
+
+            <div class="setting">
+                <label for="rows">Rows:</label>
+
+                <input
+                    id="rows"
+                    type="number"
+                    min="2"
+                    max="100"
+                    value="8">
+            </div>
+
+
+            <div class="setting">
+                <label for="cols">Columns:</label>
+
+                <input
+                    id="cols"
+                    type="number"
+                    min="2"
+                    max="100"
+                    value="8">
+            </div>
+
+
+            <button id="resizeBtn">
+                Create New Grid
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- CANVAS -->
+    <div class="canvas-container">
+
+        <canvas id="mazeCanvas"></canvas>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+    <div class="panel">
+
+        <div class="actions">
+
+            <button id="exampleBtn">
+                Load Example
+            </button>
+
+            <button id="clearBtn">
+                Clear Maze
+            </button>
+
+            <button id="clearPathBtn">
+                Clear Solution Path
+            </button>
+
+            <button id="exportBtn">
+                Generate Export
+            </button>
+
+            <button id="copyBtn">
+                Copy to Clipboard
+            </button>
+
+            <button id="downloadBtn">
+                Download .js
+            </button>
+
+        </div>
+
+        <div class="status" id="status">
+            Tool: Wall
+        </div>
+
+    </div>
+
+
+    <!-- EXPORT -->
+    <div class="panel">
+
+        <h3>Exported Maze</h3>
+
+        <div class="export-area">
+
+            <textarea
+                id="output"
+                spellcheck="false"
+                placeholder="Your exported maze will appear here..."></textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- LEGEND -->
+    <div class="panel">
+
+        <strong>Legend</strong>
+
+        <div class="legend">
+
+            <div class="legend-item">
+                <div class="legend-box legend-wall"></div>
+                Wall (#)
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-box legend-start"></div>
+                Start (S)
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-box legend-goal"></div>
+                Goal (G)
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-box legend-path"></div>
+                Solution Path
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+
+    const CELL_SIZE = 30;
+
+    const WALL = "#";
+    const EMPTY = " ";
+    const START = "S";
+    const GOAL = "G";
+
+
+    // ============================================================
+    // DOM ELEMENTS
+    // ============================================================
+
+    const canvas = document.getElementById("mazeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const rowsInput = document.getElementById("rows");
+    const colsInput = document.getElementById("cols");
+
+    const resizeBtn = document.getElementById("resizeBtn");
+
+    const exampleBtn = document.getElementById("exampleBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const clearPathBtn = document.getElementById("clearPathBtn");
+
+    const exportBtn = document.getElementById("exportBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    const output = document.getElementById("output");
+    const status = document.getElementById("status");
+
+    const toolButtons = document.querySelectorAll(".tool");
+
+
+    // ============================================================
+    // MAZE DATA
+    // ============================================================
+
+    let rows = Number(rowsInput.value);
+    let cols = Number(colsInput.value);
+
+    let maze = [];
+
+    /*
+     * Solution path is stored separately from the maze.
+     *
+     * This is important because:
+     *
+     * maze[row][col]
+     *
+     * represents the actual maze.
+     *
+     * solutionPath[row][col]
+     *
+     * represents whether that cell belongs to the solution.
+     */
+    let solutionPath = [];
+
+
+    // Current selected tool
+    let currentTool = "wall";
+
+
+    // Used for mouse/touch dragging
+    let isDrawing = false;
+
+    // Prevent repeated painting of the same cell
+    let lastCell = null;
+
+
+    // ============================================================
+    // CREATE EMPTY MAZE
+    // ============================================================
+
+    function createEmptyMaze(rowCount, colCount) {
+
+        maze = [];
+
+        solutionPath = [];
+
+        for (let row = 0; row < rowCount; row++) {
+
+            const mazeRow = [];
+            const pathRow = [];
+
+            for (let col = 0; col < colCount; col++) {
+
+                mazeRow.push(EMPTY);
+                pathRow.push(false);
+
+            }
+
+            maze.push(mazeRow);
+            solutionPath.push(pathRow);
+        }
+    }
+
+
+    // ============================================================
+    // CREATE CANVAS
+    // ============================================================
+
+    function resizeCanvas() {
+
+        canvas.width = cols * CELL_SIZE;
+        canvas.height = rows * CELL_SIZE;
+
+        render();
+    }
+
+
+    // ============================================================
+    // RENDER MAZE
+    // ============================================================
+
+    function render() {
+
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        // --------------------------------------------------------
+        // Draw cells
+        // --------------------------------------------------------
+
+        for (let row = 0; row < rows; row++) {
+
+            for (let col = 0; col < cols; col++) {
+
+                const x = col * CELL_SIZE;
+                const y = row * CELL_SIZE;
+
+                const value = maze[row][col];
+
+
+                // Default cell
+                ctx.fillStyle = "#ffffff";
+
+                ctx.fillRect(
+                    x,
+                    y,
+                    CELL_SIZE,
+                    CELL_SIZE
+                );
+
+
+                // ------------------------------------------------
+                // Solution path
+                // ------------------------------------------------
+
+                if (
+                    solutionPath[row] &&
+                    solutionPath[row][col] &&
+                    value !== WALL &&
+                    value !== START &&
+                    value !== GOAL
+                ) {
+
+                    ctx.fillStyle = "#facc15";
+
+                    ctx.fillRect(
+                        x,
+                        y,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+                }
+
+
+                // ------------------------------------------------
+                // Wall
+                // ------------------------------------------------
+
+                if (value === WALL) {
+
+                    ctx.fillStyle = "#18181b";
+
+                    ctx.fillRect(
+                        x,
+                        y,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+                }
+
+
+                // ------------------------------------------------
+                // Start
+                // ------------------------------------------------
+
+                if (value === START) {
+
+                    ctx.fillStyle = "#22c55e";
+
+                    ctx.fillRect(
+                        x,
+                        y,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+
+                    drawText(
+                        "S",
+                        x,
+                        y
+                    );
+                }
+
+
+                // ------------------------------------------------
+                // Goal
+                // ------------------------------------------------
+
+                if (value === GOAL) {
+
+                    ctx.fillStyle = "#ef4444";
+
+                    ctx.fillRect(
+                        x,
+                        y,
+                        CELL_SIZE,
+                        CELL_SIZE
+                    );
+
+                    drawText(
+                        "G",
+                        x,
+                        y
+                    );
+                }
+
+
+                // ------------------------------------------------
+                // Grid line
+                // ------------------------------------------------
+
+                ctx.strokeStyle = "#d4d4d8";
+                ctx.lineWidth = 1;
+
+                ctx.strokeRect(
+                    x + 0.5,
+                    y + 0.5,
+                    CELL_SIZE - 1,
+                    CELL_SIZE - 1
+                );
+
+            }
+        }
+    }
+
+
+    // ============================================================
+    // DRAW CELL TEXT
+    // ============================================================
+
+    function drawText(text, x, y) {
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "bold 17px Arial";
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(
+            text,
+            x + CELL_SIZE / 2,
+            y + CELL_SIZE / 2
+        );
+    }
+
+
+    // ============================================================
+    // GET CELL FROM MOUSE POSITION
+    // ============================================================
+
+    function getCellFromEvent(event) {
+
+        const rect = canvas.getBoundingClientRect();
+
+
+        /*
+         * clientX/clientY works for mouse.
+         *
+         * For touch events we use the first touch.
+         */
+
+        let clientX;
+        let clientY;
+
+        if (event.touches && event.touches.length > 0) {
+
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+
+        } else if (
+            event.changedTouches &&
+            event.changedTouches.length > 0
+        ) {
+
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+
+        } else {
+
+            clientX = event.clientX;
+            clientY = event.clientY;
+        }
+
+
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+
+        /*
+         * Because the canvas can be displayed at a different
+         * CSS size than its internal resolution, calculate the
+         * scale.
+         */
+
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+
+        const canvasX = x * scaleX;
+        const canvasY = y * scaleY;
+
+
+        const col = Math.floor(
+            canvasX / CELL_SIZE
+        );
+
+        const row = Math.floor(
+            canvasY / CELL_SIZE
+        );
+
+
+        if (
+            row < 0 ||
+            row >= rows ||
+            col < 0 ||
+            col >= cols
+        ) {
+            return null;
+        }
+
+
+        return {
+            row,
+            col
+        };
+    }
+
+
+    // ============================================================
+    // PAINT CELL
+    // ============================================================
+
+    function paintCell(row, col) {
+
+        if (
+            row < 0 ||
+            row >= rows ||
+            col < 0 ||
+            col >= cols
+        ) {
+            return;
+        }
+
+
+        switch (currentTool) {
+
+
+            // ----------------------------------------------------
+            // WALL
+            // ----------------------------------------------------
+
+            case "wall":
+
+                /*
+                 * Don't overwrite Start or Goal.
+                 */
+
+                if (
+                    maze[row][col] !== START &&
+                    maze[row][col] !== GOAL
+                ) {
+
+                    maze[row][col] = WALL;
+
+                    solutionPath[row][col] = false;
+                }
+
+                break;
+
+
+            // ----------------------------------------------------
+            // ERASE
+            // ----------------------------------------------------
+
+            case "erase":
+
+                maze[row][col] = EMPTY;
+
+                solutionPath[row][col] = false;
+
+                break;
+
+
+            // ----------------------------------------------------
+            // START
+            // ----------------------------------------------------
+
+            case "start":
+
+                /*
+                 * Remove any existing S.
+                 */
+
+                removeCharacter(START);
+
+                maze[row][col] = START;
+
+                /*
+                 * A start cell cannot be a solution overlay.
+                 */
+
+                solutionPath[row][col] = false;
+
+                break;
+
+
+            // ----------------------------------------------------
+            // GOAL
+            // ----------------------------------------------------
+
+            case "goal":
+
+                /*
+                 * Remove any existing G.
+                 */
+
+                removeCharacter(GOAL);
+
+                maze[row][col] = GOAL;
+
+                solutionPath[row][col] = false;
+
+                break;
+
+
+            // ----------------------------------------------------
+            // SOLUTION PATH
+            // ----------------------------------------------------
+
+            case "path":
+
+                /*
+                 * Don't draw the path on walls.
+                 */
+
+                if (maze[row][col] === WALL) {
+                    break;
+                }
+
+
+                /*
+                 * Don't change S/G.
+                 */
+
+                if (
+                    maze[row][col] === START ||
+                    maze[row][col] === GOAL
+                ) {
+                    break;
+                }
+
+
+                solutionPath[row][col] =
+                    !solutionPath[row][col];
+
+                break;
+        }
+
+
+        render();
+    }
+
+
+    // ============================================================
+    // REMOVE S OR G
+    // ============================================================
+
+    function removeCharacter(character) {
+
+        for (let row = 0; row < rows; row++) {
+
+            for (let col = 0; col < cols; col++) {
+
+                if (maze[row][col] === character) {
+
+                    maze[row][col] = EMPTY;
+                }
+            }
+        }
+    }
+
+
+    // ============================================================
+    // MOUSE EVENTS
+    // ============================================================
+
+    canvas.addEventListener(
+        "mousedown",
+        function(event) {
+
+            event.preventDefault();
+
+            isDrawing = true;
+
+            lastCell = null;
+
+            const cell = getCellFromEvent(event);
+
+            if (!cell) return;
+
+
+            lastCell = `${cell.row}:${cell.col}`;
+
+            paintCell(
+                cell.row,
+                cell.col
+            );
+        }
+    );
+
+
+    canvas.addEventListener(
+        "mousemove",
+        function(event) {
+
+            if (!isDrawing) return;
+
+            event.preventDefault();
+
+            const cell = getCellFromEvent(event);
+
+            if (!cell) return;
+
+
+            const cellId =
+                `${cell.row}:${cell.col}`;
+
+
+            /*
+             * Don't paint the same cell repeatedly.
+             */
+
+            if (cellId === lastCell) {
+                return;
+            }
+
+
+            lastCell = cellId;
+
+            paintCell(
+                cell.row,
+                cell.col
+            );
+        }
+    );
+
+
+    window.addEventListener(
+        "mouseup",
+        function() {
+
+            isDrawing = false;
+            lastCell = null;
+        }
+    );
+
+
+    // ============================================================
+    // TOUCH EVENTS
+    // ============================================================
+
+    canvas.addEventListener(
+        "touchstart",
+        function(event) {
+
+            event.preventDefault();
+
+            isDrawing = true;
+
+            lastCell = null;
+
+            const cell = getCellFromEvent(event);
+
+            if (!cell) return;
+
+
+            lastCell =
+                `${cell.row}:${cell.col}`;
+
+
+            paintCell(
+                cell.row,
+                cell.col
+            );
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    canvas.addEventListener(
+        "touchmove",
+        function(event) {
+
+            event.preventDefault();
+
+            if (!isDrawing) return;
+
+            const cell =
+                getCellFromEvent(event);
+
+            if (!cell) return;
+
+
+            const cellId =
+                `${cell.row}:${cell.col}`;
+
+
+            if (cellId === lastCell) {
+                return;
+            }
+
+
+            lastCell = cellId;
+
+            paintCell(
+                cell.row,
+                cell.col
+            );
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    canvas.addEventListener(
+        "touchend",
+        function(event) {
+
+            event.preventDefault();
+
+            isDrawing = false;
+            lastCell = null;
+        },
+        {
+            passive: false
+        }
+    );
+
+
+    // ============================================================
+    // TOOL BUTTONS
+    // ============================================================
+
+    toolButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                currentTool =
+                    button.dataset.tool;
+
+
+                /*
+                 * Remove active state
+                 */
+
+                toolButtons.forEach(btn => {
+                    btn.classList.remove("active");
+                });
+
+
+                /*
+                 * Activate current button
+                 */
+
+                button.classList.add("active");
+
+
+                updateStatus();
+            }
+        );
+    });
+
+
+    // ============================================================
+    // STATUS
+    // ============================================================
+
+    function updateStatus() {
+
+        const names = {
+
+            wall: "Wall (#)",
+
+            start: "Start (S)",
+
+            goal: "Goal (G)",
+
+            erase: "Eraser",
+
+            path: "Solution Path"
+        };
+
+
+        status.textContent =
+            `Tool: ${names[currentTool]}`;
+    }
+
+
+    // ============================================================
+    // CLEAR MAZE
+    // ============================================================
+
+    clearBtn.addEventListener(
+        "click",
+        function() {
+
+            createEmptyMaze(
+                rows,
+                cols
+            );
+
+            output.value = "";
+
+            render();
+
+            status.textContent =
+                "Maze cleared.";
+        }
+    );
+
+
+    // ============================================================
+    // CLEAR SOLUTION PATH
+    // ============================================================
+
+    clearPathBtn.addEventListener(
+        "click",
+        function() {
+
+            for (let row = 0; row < rows; row++) {
+
+                for (let col = 0; col < cols; col++) {
+
+                    solutionPath[row][col] = false;
+                }
+            }
+
+            render();
+
+            status.textContent =
+                "Solution path cleared.";
+        }
+    );
+
+
+    // ============================================================
+    // CREATE NEW GRID
+    // ============================================================
+
+    resizeBtn.addEventListener(
+        "click",
+        function() {
+
+            const newRows =
+                Number(rowsInput.value);
+
+            const newCols =
+                Number(colsInput.value);
+
+
+            if (
+                newRows < 2 ||
+                newRows > 100 ||
+                newCols < 2 ||
+                newCols > 100
+            ) {
+
+                alert(
+                    "Rows and columns must be between 2 and 100."
+                );
+
+                return;
+            }
+
+
+            rows = newRows;
+            cols = newCols;
+
+
+            createEmptyMaze(
+                rows,
+                cols
+            );
+
+            resizeCanvas();
+
+            output.value = "";
+
+            status.textContent =
+                `Created ${rows} × ${cols} grid.`;
+        }
+    );
+
+
+    // ============================================================
+    // LOAD EXAMPLE
+    // ============================================================
+
+    exampleBtn.addEventListener(
+        "click",
+        function() {
+
+            const exampleMaze = [
+
+                "########",
+
+                "#S     #",
+
+                "# ###  #",
+
+                "#   #  #",
+
+                "### # ##",
+
+                "#     G#",
+
+                "########"
+            ];
+
+
+            loadMaze(exampleMaze);
+        }
+    );
+
+
+    // ============================================================
+    // LOAD MAZE FROM STRING ARRAY
+    // ============================================================
+
+    function loadMaze(mazeArray) {
+
+        rows = mazeArray.length;
+
+        cols = mazeArray[0].length;
+
+
+        rowsInput.value = rows;
+        colsInput.value = cols;
+
+
+        maze = [];
+
+        solutionPath = [];
+
+
+        for (let row = 0; row < rows; row++) {
+
+            maze.push(
+                mazeArray[row].split("")
+            );
+
+            solutionPath.push(
+                new Array(cols).fill(false)
+            );
+        }
+
+
+        resizeCanvas();
+
+        output.value = "";
+
+        status.textContent =
+            "Example maze loaded.";
+    }
+
+
+    // ============================================================
+    // EXPORT MAZE
+    // ============================================================
+
+    function getMazeAsStrings() {
+
+        return maze.map(row => {
+
+            return row.join("");
+
+        });
+    }
+
+
+    function generateExport() {
+
+        const mazeArray =
+            getMazeAsStrings();
+
+
+        /*
+         * JSON.stringify gives us:
+         *
+         * [
+         *   "#####",
+         *   "#S  #",
+         *   "#####"
+         * ]
+         *
+         * Then we put const maze = before it.
+         */
+
+        return (
+            "const maze = " +
+            JSON.stringify(
+                mazeArray,
+                null,
+                4
+            ) +
+            ";"
+        );
+    }
+
+
+    exportBtn.addEventListener(
+        "click",
+        function() {
+
+            output.value =
+                generateExport();
+
+            status.textContent =
+                "Maze exported.";
+        }
+    );
+
+
+    // ============================================================
+    // COPY TO CLIPBOARD
+    // ============================================================
+
+    copyBtn.addEventListener(
+        "click",
+        async function() {
+
+            const text =
+                generateExport();
+
+
+            output.value = text;
+
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    text
+                );
+
+
+                status.textContent =
+                    "Maze copied to clipboard.";
+
+            } catch (error) {
+
+                /*
+                 * Clipboard API may be unavailable
+                 * when opening the file directly.
+                 */
+
+                output.select();
+
+                document.execCommand("copy");
+
+                status.textContent =
+                    "Maze copied.";
+            }
+        }
+    );
+
+
+    // ============================================================
+    // DOWNLOAD .JS
+    // ============================================================
+
+    downloadBtn.addEventListener(
+        "click",
+        function() {
+
+            const text =
+                generateExport();
+
+
+            const blob =
+                new Blob(
+                    [text],
+                    {
+                        type: "text/javascript"
+                    }
+                );
+
+
+            const url =
+                URL.createObjectURL(blob);
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.href = url;
+
+            link.download =
+                "maze.js";
+
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
+
+
+            URL.revokeObjectURL(url);
+
+
+            status.textContent =
+                "maze.js downloaded.";
+        }
+    );
+
+
+    // ============================================================
+    // INITIALIZE
+    // ============================================================
+
+    createEmptyMaze(
+        rows,
+        cols
+    );
+
+    resizeCanvas();
+
+    updateStatus();
+
+</script>
+
+</body>
+</html>

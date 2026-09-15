@@ -1,0 +1,48 @@
+check functions
+stepRobot
+update
+nextGeneration
+
+
+createPopulation
+   evaluatePopulation
+      evolve
+
+
+hyperparameters we've created:
+
+POPULATION_SIZE = 100
+
+ELITE_COUNT = 10
+
+MUTATION_RATE = 0.1
+
+MAX_STEPS = 100
+
+GOAL_REWARD = 1000
+
+These aren't learned by the network.
+
+We choose them.
+
+
+
+
+Backpropagation
+prediction
+   ↓
+error
+   ↓
+gradient
+   ↓
+change weights
+Evolution
+random brain
+   ↓
+test behavior
+   ↓
+fitness
+   ↓
+keep good brains
+   ↓
+muta

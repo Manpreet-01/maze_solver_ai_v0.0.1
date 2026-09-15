@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neural Maze</title>
+
+    <style>
+        body {
+            background: #222;
+            color: white;
+            font-family: Arial;
+            margin: 0;
+/*            text-align: center;*/
+        }
+
+        canvas {
+            border: 1px solid white;
+            margin-top: 0px;
+        }
+        #brain {
+            width: 480px;
+            margin: 0px;
+            margin-top: 10px;
+            margin-left: 10px;
+            text-align: left;
+            font-family: monospace;
+        }
+
+        .bar {
+            height: 20px;
+            background: #555;
+            margin: 5px 0 15px;
+        }
+
+        .fill {
+            height: 100%;
+            background: limegreen;
+            width: 0%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <h1>🧠 Neural Maze</h1> -->
+
+    <canvas id='mazeCanvas'></canvas>
+    <canvas id='mazeCanvas2'></canvas>
+    
+
+    <br>
+
+    <div style="display:flex; justify-content:space-between; width:35vw;min-width:350px;">
+        <div>
+            <button id="runBtn">Run</button>
+            <button id="moveBtn">Move</button>
+            <button id="stepAllBtn">Step All</button>
+        </div>
+        <div style="display:flex;gap: 5px;">
+            <input id="watchIndexInp" type="number" value="0" placeholder="Select network" style="width:40px;">
+            <button id="watchBtn">Watch</button>
+            <button id="mutateBtn">Mutate</button>
+        </div>
+    </div>
+
+
+        <div id="brain">
+        <!-- <h2>Brain</h2> -->
+
+        <div>UP: <span id="upValue">0</span></div>
+        <div class="bar">
+            <div id="upBar" class="fill"></div>
+        </div>
+
+        <div>RIGHT: <span id="rightValue">0</span></div>
+        <div class="bar">
+            <div id="rightBar" class="fill"></div>
+        </div>
+
+        <div>DOWN: <span id="downValue">0</span></div>
+        <div class="bar">
+            <div id="downBar" class="fill"></div>
+        </div>
+
+        <div>LEFT: <span id="leftValue">0</span></div>
+        <div class="bar">
+            <div id="leftBar" class="fill"></div>
+        </div>
+
+        <h2>
+            Decision:
+            <span id="decision">?</span>
+        </h2>
+    </div>
+
+
+
+    <script src="data.js"></script>
+
+    <script src="utils.js"></script>
+    <script src="draw utils.js"></script>
+    
+    <script src="handlers.js"></script>
+
+    <script src="agent.js"></script>
+    <script src="neuron.js"></script>
+    <script src="layer.js"></script>
+    <script src="network.js"></script>
+    <script src="robot.js"></script>
+
+    <!-- <script src="script.js"></script> -->
+    <script src="script2.js"></script>
+
+    <script src="test.js"></script>
+</body>
+</html>
