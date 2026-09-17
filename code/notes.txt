@@ -1,3 +1,6 @@
+!!!!!!! working on populateSingleMode
+
+
 check functions
 stepRobot
 update
@@ -7,6 +10,33 @@ nextGeneration
 createPopulation
    evaluatePopulation
       evolve
+
+
+functionality done:
+   1. created population of agents
+   2. save and load agent.networks from localstorage
+      -> cutLocalStorageNetworksArray
+   
+   3. evolve ->
+      -> sort best networks
+      -> first ten networks cloned
+      -> rest of networks mutated by mutation rate
+
+   4. evolve agents by one generation by pressing w button.
+   5.run all agents on canvas by one step by pressing q button.
+   6. agent can move around by keyboard arrow keys (stored in agent variable)
+   7. load all networks from local storage ->
+      ->run one by one and see in canvas how they try to solve maze
+
+
+
+todo:
+   imrove fitness logic
+      Generation: 37
+      Best fitness: 184
+      Average fitness: 71
+      Worst fitness: -12
+
 
 
 hyperparameters we've created:
@@ -45,4 +75,127 @@ fitness
    ↓
 keep good brains
    ↓
-muta
+mutation
+
+
+                    YOUR PROJECT
+                         │
+        ┌────────────────┴────────────────┐
+        │                                 │
+   PHASE 1 DONE                      PHASE 2
+   Infrastructure                    Learning
+        │                                 │
+        │                         ┌───────┴────────┐
+        │                         │                │
+        ▼                         ▼                ▼
+   Population                 Fitness          Training
+   Networks                   system           system
+   Canvas                      │                │
+   Save/load                   ▼                ▼
+   Keyboard                  measure         improve
+        │
+        └──────────────────────────┐
+                                   ▼
+                              PHASE 3
+                           Visualization
+                                   │
+                                   ▼
+                              PHASE 4
+                            Experiments
+                                   │
+                                   ▼
+                              PHASE 5
+                         Better neural network
+                                   │
+                                   ▼
+                              PHASE 6
+                           Final project
+
+
+
+
+fitness
+  ^
+200|                         *
+   |                     * *
+150|                 * *   *
+   |             * *       *
+100|         * * *
+   |      * *
+ 50|   * *
+   | **
+  0|____________________________> generation
+     1  10  20  30  40  50
+
+
+
+history.push({
+    generation,
+    bestFitness,
+    averageFitness
+});
+
+Generation 1   → terrible
+Generation 10  → slightly better
+Generation 50  → better
+Generation 100 → plateau
+
+Add a seedable random-number generator
+
+
+
+                    YOU ARE HERE
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │ 1. Fitness system   │ ← NEXT
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 2. Statistics       │
+              │ best/avg/worst      │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 3. Fitness graph    │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 4. Improve selection│
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 5. Mutation tests   │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 6. Better sensors   │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 7. Neural viz       │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 8. Maze generator   │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │ 9. Backprop version │
+              └─────────────────────┘
+
+
+
+
+
+
+
+
+
+
+mutate.network then save back to 
+
+
+
+
+

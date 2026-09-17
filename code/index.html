@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Neural Maze</title>
-
+    <script>const l = console.log;// console.log manipulation here</script>
     <style>
         body {
             background: #222;
@@ -26,9 +26,9 @@
         }
 
         .bar {
-            height: 20px;
+            height: 10px;
             background: #555;
-            margin: 5px 0 15px;
+            margin: 5px 0 10px;
         }
 
         .fill {
@@ -42,24 +42,110 @@
 <body>
     <!-- <h1>🧠 Neural Maze</h1> -->
 
+    <style type="text/css">
+        .ui_layer {
+            position: absolute;
+        }
+    </style>
+    <div class="ui_layer">
+        
+        <div>Fitness: <span id="showFitnessEle"></span></div>
+        <div>Step: <span id="showStepEle"></span></div>
+
+    </div>
+
+
+
     <canvas id='mazeCanvas'></canvas>
     <canvas id='mazeCanvas2'></canvas>
     
 
     <br>
 
-    <div style="display:flex; justify-content:space-between; width:35vw;min-width:350px;">
+<style>
+    div.btn-container{
+        display:flex;
+        justify-content:space-between;
+        /*width:35vw;*/
+        min-width:400px;
+        background: black;
+    }
+    h2.decision {
+        margin: 0;
+        font-size: 15px;
+    }
+</style>
+
+    <div class='btn-container'>
         <div>
             <button id="runBtn">Run</button>
             <button id="moveBtn">Move</button>
-            <button id="stepAllBtn">Step All</button>
         </div>
-        <div style="display:flex;gap: 5px;">
-            <input id="watchIndexInp" type="number" value="0" placeholder="Select network" style="width:40px;">
-            <button id="watchBtn">Watch</button>
-            <button id="mutateBtn">Mutate</button>
+        <div style="display:flex;gap: 20px;">
+            <div>
+                <input id="watchIndexInp" type="number" value="0" min="0" placeholder="Select network" style="width:40px;">
+                <button id="watchBtn">Watch</button>
+            </div>
+
+            <div>
+                <input id="mutateRateInp" type="number" value="0.1" step="0.1" min="0.1" max="0.9"  style="width:35px;">
+                <button id="mutateBtn">Mutate</button>
+            </div>
+
         </div>
     </div>
+
+
+        <style>
+            :root {
+                --btn-hover-bg-clr: #007bff; /* Variables must start with two dashes -- */
+                --fieldset-label-hover-bg-clr: #007bff;
+            }
+
+            fieldset.fieldset-1 {
+                border: 1px solid rgba(255, 255, 255, 1);
+                display: flex;
+                column-gap: 5px;
+            }
+            fieldset.fieldset-1 label {
+                padding: 0px 4px;
+                border-radius: 4px;
+            }
+            fieldset.fieldset-1 label:hover {
+                background-color: var(--fieldset-label-hover-bg-clr, #cccccc);
+                cursor: pointer;
+            }
+        </style>
+
+        <style>
+            button:hover{
+                background-color: var(--btn-hover-bg-clr, #cccccc);
+                cursor: pointer;
+            }
+        </style>
+
+
+        <div id="mode_selection_container" style="display:flex;flex-direction:column;row-gap:5px;width:300px;">
+            <fieldset class="fieldset-1">
+                <legend>Mode</legend>
+                <label>
+                    <input id="singleModeInput" class="mode_setter" type="radio" name="agent-mode1" value="single" checked>Single
+                </label>
+                <label>
+                    <input id="multipleModeInput" class="mode_setter" type="radio" name="agent-mode1" value="multiple">Multiple
+                </label>
+            </fieldset>
+
+           <fieldset class='fieldset-1'>
+                <label>
+                  <input id="populateModeInput" class="mode_setter" type="radio" name="agent-mode2" value="populated" checked>Populated
+                </label>
+
+                <label>
+                  <input id="storedModeInput"  class="mode_setter" type="radio" name="agent-mode2" value="localStorage">Stored
+                </label>
+            </fieldset>
+        </div>
 
 
         <div id="brain">
@@ -85,7 +171,7 @@
             <div id="leftBar" class="fill"></div>
         </div>
 
-        <h2>
+        <h2 class="decision">
             Decision:
             <span id="decision">?</span>
         </h2>

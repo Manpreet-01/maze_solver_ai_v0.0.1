@@ -72,7 +72,7 @@ function calculateReward(oldDistance,newDistance,moved,reachedGoal) {
 
     // Small progress reward
     if (newDistance < oldDistance) {
-        reward += 50;
+        reward += 10;
     }
 
     // Small penalty for moving away
@@ -82,7 +82,7 @@ function calculateReward(oldDistance,newDistance,moved,reachedGoal) {
 
     // HUGE reward for solving
     if (reachedGoal) {
-        reward += 100;
+        reward += 1000;
     }
 
     return reward;
@@ -463,6 +463,9 @@ function watchAgentSolving(network, animationSpeed=100) {
 
     const timer = setInterval(function() {
             step++;
+            
+            showFitnessEle.innerText = network.fitness
+            showStepEle.innerText = step
 
             if (step >= MAX_STEPS) {
                 console.log("🎯 Failed to SOLVED THE MAZE! in "+ step +" steps");

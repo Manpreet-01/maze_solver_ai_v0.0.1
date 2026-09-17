@@ -9,16 +9,44 @@ function saveNewBrainToLocalStorage(index=-1){
     localStorage.setItem("networks", networksData);
     console.log("saved:: ", JSON.parse(networksData));
 }
-
+    
 function mutateBtnFun(){
     mutateNetwork(agent.network, mutationRate);
-    console.log("network mutated.")
 }
+
+function  changeMutationRate(e){
+    mutationRate =  Number(e.target.value);
+}
+
 mutateBtn.onclick = mutateBtnFun
+mutateRateInp.onchange = changeMutationRate;
 
-// watchAgentSolving(nets[0])
-
-{
+{   
+    // set last index in watchIndexInp's value in html input element
     const nets = JSON.parse(localStorage.getItem("networks"))
     watchIndexInp.value = nets.length -1 ;
 }
+
+async function runAllLocalStorageAgents(){
+    const nets = JSON.parse(localStorage.getItem("networks"));
+    for (const i in nets){
+        watchAgentSolving(getNetworkFromLocalStorage(i));
+        await sleep(500);
+    }
+
+}
+
+
+
+
+function cutLocalStorageNetworksArray(index){
+    if(!index || typeof index != 'number')return;
+
+    const nets = JSON.parse(localStorage.getItem("networks"))
+    nets.length = 50
+
+    const networksData = JSON.stringify(nets)
+    localStorage.setItem("networks", networksData);
+}
+
+
