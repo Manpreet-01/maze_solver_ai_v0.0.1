@@ -1,3 +1,25 @@
+function createRandom(seed) {
+  let state = seed >>> 0;
+
+  return function () {
+    state += 0x6D2B79F5;    // Mulberry32 PRNG
+
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Same seed = same sequence
+const seed = 2
+const random = createRandom(seed);
+
+
+
+
+
 // sigmoid(x) = 1 / (1 + e^-x) activation function
 function sigmoid(x) {
     return 1 / (1 + Math.exp(-x));
@@ -9,7 +31,7 @@ function sigmoidDerivative(output) {
 }
 
 function getRandomColor(opacity=1){
-    return `rgba(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255}, ${opacity})`
+    return `rgba(${random()*255}, ${random()*255}, ${random()*255}, ${opacity})`
 }
 
 function sleep(ms) {
@@ -91,20 +113,15 @@ function calculateReward(oldDistance,newDistance,moved,reachedGoal) {
 
 // move 1 step and return {inputs, outputs, direction};
 function neuralMove(agent, maze) {
-    // 1. Look around
-    const inputs = agent.sense(maze);
+    const inputs = agent.sense(maze);    // 1. Look around
 
-    // 2. Think
-    const outputs = agent.network.predict(inputs);
+    const outputs = agent.network.predict(inputs);  // 2. Think
+    
+    const action = chooseAction(outputs);   // 3. Choose action
 
-    // 3. Choose action
-    const action = chooseAction(outputs);
+    const direction = actionNames[action];  // 4. Convert number to direction
 
-    // 4. Convert number to direction
-    const direction = actionNames[action];
-
-    // 5. Move
-    agent.move(maze, direction);
+    agent.move(maze, direction);    // 5. Move
 
     return {inputs, outputs, direction};
 }
@@ -171,6 +188,29 @@ function runBrain(network, maze) {
 }
 
 
+
+function stepAgent(agent, maze, goal) {
+    const inputs = agent.sense(maze);
+    const outputs = agent.network.predict(inputs);
+
+    const action = chooseAction(outputs);
+    const direction = actionNames[action];
+
+    const oldDistance = distanceToGoal(agent, goal);
+
+    const moved = agent.move(maze, direction);
+    if (!moved) agent.wallHits++
+
+    const newDistance = distanceToGoal(agent, goal);
+
+    agent.reachedGoal = reachedGoal(maze, agent);
+    agent.fitness += calculateReward(oldDistance, newDistance, moved, agent.reachedGoal);
+    agent.steps++
+
+    if (agent.reachedGoal){
+        console.log("debug this issue, agent running after goal achieved")
+    }
+}
 
 // run by no. of max_steps and eturn { fitness, steps, wallHits, reachedGoal: isReached};
 function runAgent(agent, maze, goal, max_steps = 25) {
@@ -377,12 +417,12 @@ function mutateNetwork(network, mutationRate = 0.1) {
         for (let i = 0; i < neuron.weights.length; i++) {
 
             neuron.weights[i] +=
-                (Math.random() * 2 - 1) *
+                (random() * 2 - 1) *
                 mutationRate;
         }
 
         neuron.bias +=
-            (Math.random() * 2 - 1) *
+            (random() * 2 - 1) *
             mutationRate;
     }
 
@@ -391,12 +431,12 @@ function mutateNetwork(network, mutationRate = 0.1) {
         for (let i = 0; i < neuron.weights.length; i++) {
 
             neuron.weights[i] +=
-                (Math.random() * 2 - 1) *
+                (random() * 2 - 1) *
                 mutationRate;
         }
 
         neuron.bias +=
-            (Math.random() * 2 - 1) *
+            (random() * 2 - 1) *
             mutationRate;
     }
 
@@ -454,14 +494,12 @@ function evolve() {
 
 
 
-function watchAgentSolving(network, animationSpeed=100) {
-    agent.network = brain;
+function watchAgentSolving_old_fun(network, animationSpeed=100) {
     setAgentProp(network, start.row, start.col)
 
     let step = 0;
-    const mutationRate = 0.1;
 
-    const timer = setInterval(function() {
+    const timer = setInterval(function () {
             step++;
             
             showFitnessEle.innerText = network.fitness
@@ -474,7 +512,7 @@ function watchAgentSolving(network, animationSpeed=100) {
                 return;
             }
 
-            neuralMove(agent, maze);
+            const { inputs, outputs, direction } = neuralMove(agent, maze);
 
             if (reachedGoal(maze, agent)) {
                 clearInterval(timer);
@@ -483,10 +521,57 @@ function watchAgentSolving(network, animationSpeed=100) {
 
             updateUi();
         }, animationSpeed);
+    
     return timer;
 }
 
 
+const collectedData = []
+
+function watchAgentSolving(network, animationSpeed=200) {
+    console.log("solving....")
+    setAgentProp(network, start.row, start.col);
+
+    const timer = setInterval(function() {            
+            showFitnessEle.innerText = agent.fitness
+            showStepsEle.innerText = agent.steps
+            wallHitsEle.innerText = agent.wallHits
+            goalReachedEle.innerText = agent.reachedGoal
+            generationEle.innerText = agent.generation
+
+            if (agent.steps >= MAX_STEPS) {
+                clearInterval(timer);
+                console.log("🎯 Failed ", agent);
+
+                collectedData.push({
+                    fitness: agent.fitness,
+                    generation: agent.generation,
+                    mutationRate: mutationRate,
+                });
+
+                agent.steps = 0;
+                agent.wallHits = 0;
+                agent.fitness = 0;
+
+                mutateNetwork(agent.network);
+                agent.generation++;
+
+                watchAgentSolving(network);
+                // return;
+            }
+
+            stepAgent(agent, maze, goal);
+
+            if (agent.reachedGoal) {
+                clearInterval(timer);
+                console.log("🎯 MAZE SOLVED ", agent);
+            }
+
+            updateUi();
+        }, animationSpeed);
+
+    return timer;
+}
 
 
 function createPopulation(size) {
@@ -591,7 +676,7 @@ function createNextGeneration_fv1(results, mutationAmount=0.2) {
     while (nextGeneration.length < POPULATION_SIZE) {
         const parent = elites[
                 Math.floor(
-                    Math.random() * elites.length
+                    random() * elites.length
                 )
             ];
 
@@ -619,7 +704,7 @@ function createNextGeneration_fv2(results, mutationAmount = 0.2) {
     }
 
     while (nextGeneration.length < 100) {
-        const parent = results[Math.floor(Math.random() * survivorCount)].agent; // Pick a random survivor
+        const parent = results[Math.floor(random() * survivorCount)].agent; // Pick a random survivor
 
         // const child = parent.clone();  // implement this function
         const childAgent = cloneAgent(parent);
@@ -676,3 +761,5 @@ function stepPopulation(){
         )
     });
 }
+
+

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generation vs Fitness</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 900px;
+        }
+
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+        }
+
+        #tooltip {
+            position: absolute;
+            display: none;
+
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+
+            padding: 8px 12px;
+            border-radius: 6px;
+
+            font-size: 13px;
+
+            pointer-events: none;
+
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chart-container">
+
+    <canvas id="fitnessChart"
+            width="900"
+            height="600">
+    </canvas>
+
+    <div id="tooltip"></div>
+
+</div>
+
+
+<script>
+
+const demoData = [
+    { fitness: -135, generation: 0 },
+    { fitness: -135, generation: 1 },
+    { fitness: -120, generation: 2 },
+    { fitness: -80,  generation: 3 },
+    { fitness: -100, generation: 4 },
+    { fitness: -40,  generation: 5 },
+    { fitness: 20,   generation: 6 },
+    { fitness: 60,   generation: 7 },
+    { fitness: 45,   generation: 8 },
+    { fitness: 100,  generation: 9 },
+    { fitness: 130,  generation: 10 }
+];
+
+
+const canvas = document.getElementById("fitnessChart");
+const ctx = canvas.getContext("2d");
+
+const tooltip = document.getElementById("tooltip");
+
+
+const width = canvas.width;
+const height = canvas.height;
+
+
+// Space around graph
+const padding = {
+    left: 80,
+    right: 30,
+    top: 40,
+    bottom: 70
+};
+
+
+// --------------------------------------------------
+// Calculate data ranges
+// --------------------------------------------------
+
+let minX = Math.min(...demoData.map(p => p.generation));
+let maxX = Math.max(...demoData.map(p => p.generation));
+
+let minY = Math.min(...demoData.map(p => p.fitness));
+let maxY = Math.max(...demoData.map(p => p.fitness));
+
+
+// Make sure 0 is always visible on Y axis
+minY = Math.min(minY, 0);
+maxY = Math.max(maxY, 0);
+
+
+// Add some vertical space
+const yPadding = (maxY - minY) * 0.1;
+
+minY -= yPadding;
+maxY += yPadding;
+
+
+// --------------------------------------------------
+// Coordinate conversion
+// --------------------------------------------------
+
+function xToCanvas(x) {
+
+    const graphWidth =
+        width - padding.left - padding.right;
+
+    return padding.left +
+        ((x - minX) / (maxX - minX)) *
+        graphWidth;
+}
+
+
+function yToCanvas(y) {
+
+    const graphHeight =
+        height - padding.top - padding.bottom;
+
+    // IMPORTANT:
+    // Canvas Y increases downward,
+    // so we invert the mathematical Y axis.
+
+    return height - padding.bottom -
+        ((y - minY) / (maxY - minY)) *
+        graphHeight;
+}
+
+
+// --------------------------------------------------
+// Draw grid
+// --------------------------------------------------
+
+function drawGrid() {
+
+    ctx.strokeStyle = "#e5e5e5";
+    ctx.lineWidth = 1;
+
+    // Vertical grid lines
+    for (let x = minX; x <= maxX; x++) {
+
+        const canvasX = xToCanvas(x);
+
+        ctx.beginPath();
+        ctx.moveTo(canvasX, padding.top);
+        ctx.lineTo(canvasX, height - padding.bottom);
+        ctx.stroke();
+    }
+
+
+    // Horizontal grid lines
+    // We'll use a reasonable number of lines.
+
+    const gridCount = 10;
+
+    for (let i = 0; i <= gridCount; i++) {
+
+        const value =
+            minY + (maxY - minY) * (i / gridCount);
+
+        const canvasY = yToCanvas(value);
+
+        ctx.beginPath();
+        ctx.moveTo(padding.left, canvasY);
+        ctx.lineTo(width - padding.right, canvasY);
+        ctx.stroke();
+    }
+}
+
+
+// --------------------------------------------------
+// Draw axes
+// --------------------------------------------------
+
+function drawAxes() {
+
+    ctx.strokeStyle = "#222";
+    ctx.fillStyle = "#222";
+
+    ctx.lineWidth = 2;
+
+
+    // ----------------------------------------------
+    // X axis (fitness = 0)
+    // ----------------------------------------------
+
+    const zeroY = yToCanvas(0);
+
+    ctx.beginPath();
+
+    ctx.moveTo(padding.left, zeroY);
+    ctx.lineTo(width - padding.right, zeroY);
+
+    ctx.stroke();
+
+
+    // X-axis arrow
+
+    ctx.beginPath();
+
+    ctx.moveTo(width - padding.right, zeroY);
+
+    ctx.lineTo(width - padding.right - 10, zeroY - 6);
+
+    ctx.lineTo(width - padding.right - 10, zeroY + 6);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    // ----------------------------------------------
+    // Y axis
+    // ----------------------------------------------
+
+    const zeroX = xToCanvas(0);
+
+    ctx.beginPath();
+
+    ctx.moveTo(zeroX, padding.top);
+    ctx.lineTo(zeroX, height - padding.bottom);
+
+    ctx.stroke();
+
+
+    // Y-axis arrow
+
+    ctx.beginPath();
+
+    ctx.moveTo(zeroX, padding.top);
+
+    ctx.lineTo(zeroX - 6, padding.top + 10);
+    ctx.lineTo(zeroX + 6, padding.top + 10);
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    // ----------------------------------------------
+    // Axis labels
+    // ----------------------------------------------
+
+    ctx.font = "bold 15px Arial";
+
+
+    // Generation ->
+    ctx.textAlign = "right";
+    ctx.fillText(
+        "Generation →",
+        width - padding.right,
+        zeroY + 30
+    );
+
+
+    // Fitness ↑
+    ctx.save();
+
+    ctx.translate(
+        zeroX - 35,
+        padding.top
+    );
+
+    ctx.rotate(-Math.PI / 2);
+
+    ctx.textAlign = "left";
+
+    ctx.fillText(
+        "Fitness ↑",
+        0,
+        0
+    );
+
+    ctx.restore();
+}
+
+
+// --------------------------------------------------
+// Draw X-axis labels
+// --------------------------------------------------
+
+function drawXAxisLabels() {
+
+    ctx.fillStyle = "#444";
+    ctx.font = "13px Arial";
+    ctx.textAlign = "center";
+
+
+    for (let generation = minX;
+         generation <= maxX;
+         generation++) {
+
+        const x = xToCanvas(generation);
+        const y = yToCanvas(0);
+
+
+        // Tick
+        ctx.strokeStyle = "#222";
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, y - 5);
+        ctx.lineTo(x, y + 5);
+
+        ctx.stroke();
+
+
+        // Number
+        ctx.fillText(
+            generation,
+            x,
+            y + 22
+        );
+    }
+}
+
+
+// --------------------------------------------------
+// Draw Y-axis labels
+// --------------------------------------------------
+
+function drawYAxisLabels() {
+
+    ctx.fillStyle = "#444";
+    ctx.font = "13px Arial";
+    ctx.textAlign = "right";
+
+
+    const gridCount = 10;
+
+
+    for (let i = 0; i <= gridCount; i++) {
+
+        const value =
+            minY + (maxY - minY) * (i / gridCount);
+
+        const y = yToCanvas(value);
+
+        const x = xToCanvas(0);
+
+
+        // Tick
+        ctx.strokeStyle = "#222";
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+
+        ctx.moveTo(x - 5, y);
+        ctx.lineTo(x + 5, y);
+
+        ctx.stroke();
+
+
+        // Number
+        ctx.fillText(
+            Math.round(value),
+            x - 10,
+            y + 4
+        );
+    }
+}
+
+
+// --------------------------------------------------
+// Draw fitness line
+// --------------------------------------------------
+
+function drawLine() {
+
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+
+    demoData.forEach((point, index) => {
+
+        const x = xToCanvas(point.generation);
+        const y = yToCanvas(point.fitness);
+
+
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+
+
+    ctx.stroke();
+}
+
+
+// --------------------------------------------------
+// Draw points
+// --------------------------------------------------
+
+function drawPoints() {
+
+    demoData.forEach(point => {
+
+        const x = xToCanvas(point.generation);
+        const y = yToCanvas(point.fitness);
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            5,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "#2563eb";
+        ctx.fill();
+
+
+        // Small white border
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+    });
+}
+
+
+// --------------------------------------------------
+// Draw everything
+// --------------------------------------------------
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    drawGrid();
+
+    drawAxes();
+
+    drawXAxisLabels();
+
+    drawYAxisLabels();
+
+    drawLine();
+
+    drawPoints();
+}
+
+
+draw();
+
+
+// --------------------------------------------------
+// Hover detection
+// --------------------------------------------------
+
+canvas.addEventListener("mousemove", function(event) {
+
+    const rect = canvas.getBoundingClientRect();
+
+    const mouseX =
+        event.clientX - rect.left;
+
+    const mouseY =
+        event.clientY - rect.top;
+
+
+    let hoveredPoint = null;
+
+
+    for (const point of demoData) {
+
+        const x = xToCanvas(point.generation);
+        const y = yToCanvas(point.fitness);
+
+
+        const distance =
+            Math.sqrt(
+                (mouseX - x) ** 2 +
+                (mouseY - y) ** 2
+            );
+
+
+        // 10px hit area
+
+        if (distance <= 10) {
+
+            hoveredPoint = point;
+            break;
+        }
+    }
+
+
+    if (hoveredPoint) {
+
+        tooltip.style.display = "block";
+
+
+        tooltip.innerHTML = `
+            <strong>Generation:</strong>
+            ${hoveredPoint.generation}
+            <br>
+            <strong>Fitness:</strong>
+            ${hoveredPoint.fitness}
+        `;
+
+
+        tooltip.style.left =
+            (mouseX + 15) + "px";
+
+        tooltip.style.top =
+            (mouseY + 15) + "px";
+
+
+        canvas.style.cursor = "pointer";
+
+    } else {
+
+        tooltip.style.display = "none";
+
+        canvas.style.cursor = "default";
+    }
+
+});
+
+</script>
+
+</body>
+</html>

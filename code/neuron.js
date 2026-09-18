@@ -5,21 +5,21 @@ class Neuron {
         this.weights = [];
 
         for (let i = 0; i < inputCount; i++) {
-            this.weights.push(Math.random() * 2 - 1);
+            this.weights.push(random() * 2 - 1);
         }
 
-        this.bias = Math.random() * 2 - 1;
+        this.bias = random() * 2 - 1;
 
         this.output = 0;
     }
 
     mutate(amount) {
         for (let i = 0; i < this.weights.length; i++) {
-            this.weights[i] += (Math.random() * 2 - 1) * amount;
+            this.weights[i] += (random() * 2 - 1) * amount;
         }
 
-        this.bias += (Math.random() * 2 - 1) * amount;
-        this.output += (Math.random() * 2 - 1) * amount;
+        this.bias += (random() * 2 - 1) * amount;
+        this.output += (random() * 2 - 1) * amount;
     }
 
     clone() {

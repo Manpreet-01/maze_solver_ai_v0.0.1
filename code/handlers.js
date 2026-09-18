@@ -28,7 +28,7 @@ document.onkeydown = function keyDownHandler(event) {
     updateUi();
 }
 
-runBtn.onclick = async function runBtnHandler(){
+runBtn.onclick = function runBtnHandler(){
     console.log("run clicked, before fitness: ", fitness)
     const { fitness: newFitness } = runAgent(agent, maze, goal);
     if(newFitness > fitness) {
@@ -49,6 +49,8 @@ moveBtn.onclick = function moveBtnHandler(){
 setTimeout(function (){    // starter 
     updateUi()
     console.log("first ui update")
+    populateSingleMode()
+    console.log("populateSingleMode() executed")
 },500)
 
 
@@ -85,10 +87,15 @@ function setCurrMode(){
     }
 }
 
-// agent, maze run in ui and get its fitness
 function populateSingleMode(){
     const watchIndex = population.length-1;  // initially set to count of population
-    // watchIndex = watchIndexInp.value
+    watchIndexInp.value = watchIndex;         // dom
+
+    agent.steps = 0;
+    agent.wallHits = 0;
+    agent.reachedGoal = false;
+    agent.generation = 0
+    
     watchAgentSolving(population[watchIndex].network);
 }
 
@@ -104,8 +111,6 @@ function storedMultipleMode(argument) {
     // body...
 }
 
-watchBtn.onclick = function(){
-    const watchIndex = Number(watchIndexInp.value);
-    l(watchIndex)
-    // watchAgentSolving(getNetworkFromLocalStorage(watchIndex));
+watchBtn.onclick = function watchBtnHandler(){
+    populateSingleMode();
 }

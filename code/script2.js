@@ -35,7 +35,7 @@ const start = findCharacter(maze, "S");
 
 const agent = new Agent(start.row, start.col);
 
-const restoreNetworkFromLocalStorage = !false;
+const restoreNetworkFromLocalStorage = false;
 
 agent.network = restoreNetworkFromLocalStorage
     ? agent.network = getNetworkFromLocalStorage(0)
@@ -44,3 +44,6 @@ agent.network = restoreNetworkFromLocalStorage
 let bestAgent = agent;
 let fitness = agent.fitness;
 let bestFitness = bestAgent.fitness;
+
+
+
