@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neural Maze</title>
+    <script>const l = console.log;// console.log manipulation here</script>
+    <style>
+        body {
+            background: #222;
+            color: white;
+            font-family: Arial;
+            margin: 0;
+/*            text-align: center;*/
+        }
+
+        canvas {
+            border: 1px solid white;
+            margin-top: 0px;
+        }
+        #brain {
+            width: 480px;
+            margin: 0px;
+            margin-top: 10px;
+            margin-left: 10px;
+            text-align: left;
+            font-family: monospace;
+        }
+
+        .bar {
+            height: 10px;
+            background: #555;
+            margin: 5px 0 10px;
+        }
+
+        .fill {
+            height: 100%;
+            background: limegreen;
+            width: 0%;
+        }
+    </style>
+</head>
+
+<body>
+    <style type="text/css">
+        .ui_layer {
+            position: absolute;
+            right: 0;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            row-gap: 5px;
+        }
+    </style>
+
+    <div class="ui_layer">
+        <fieldset>
+            <legend>Agent</legend>
+            <div>Best Fitness: <span id="bestFitnessEle">-</span></div>
+            <div>Fitness: <span id="showFitnessEle">-</span></div>
+            <div>Steps: <span id="showStepsEle">-</span></div>
+            <div>Wall hits: <span id="wallHitsEle">-</span></div>
+            <div>Goal Reached: <span id="goalReachedEle">-</span></div>
+        </fieldset>
+        
+        <fieldset>
+            <legend>Evolution</legend>
+            <div>Generation: <span id="generationEle">-</span></div>
+            <div>Mutation Rate: <span id="mutationRateEle">-</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Local Storage</legend>
+            <div>Agent Index: <span id="agentIndexFromLocalStorageEle">-</span></div>
+            <div>Count: <span id="agentCountFromLocalStorageEle">-</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Populated</legend>
+            <div>Agent Index: <span id="agentIndexFromPopulatedEle">-</span></div>
+            <div>Count: <span id="agentCountFromPopulatedEle">-</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Level</legend>
+            <div>Level: <span id="levelEle">-</span></div>
+            <div>Count: <span id="levelCountEle">-</span></div>
+        </fieldset>
+    </div>
+
+
+
+    <canvas id='mazeCanvas'></canvas>
+    <canvas id='mazeCanvas2'></canvas>
+    
+
+    <br>
+
+    <style>
+        div.btn-container{
+            display:flex;
+            justify-content:space-between;
+            /*width:35vw;*/
+            min-width:400px;
+            background: black;
+        }
+        h2.decision {
+            margin: 0;
+            font-size: 15px;
+        }
+    </style>
+
+    <div class='btn-container'>
+        <div>
+            <button id="runBtn">Run</button>
+            <button id="stepBtn">Step</button>
+            <button id="moveBtn">Move</button>
+        </div>
+        <div style="display:flex;gap: 20px;">
+            <div>
+                <input id="watchIndexInp" type="number" value="0" min="0" placeholder="Select network" style="width:40px;">
+                <button id="watchBtn">Watch</button>
+            </div>
+
+            <div>
+                <input id="mutateRateInp" type="number" value="0.1" step="0.1" min="0.1" max="0.9"  style="width:35px;">
+                <button id="mutateBtn">Mutate</button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <style>
+        :root {
+            --btn-hover-bg-clr: #007bff; /* Variables must start with two dashes -- */
+            --fieldset-label-hover-bg-clr: #007bff;
+        }
+
+        fieldset.fieldset-1 {
+            border: 1px solid rgba(255, 255, 255, 1);
+            display: flex;
+            column-gap: 5px;
+        }
+        fieldset.fieldset-1 label {
+            padding: 0px 4px;
+            border-radius: 4px;
+        }
+        fieldset.fieldset-1 label:hover {
+            background-color: var(--fieldset-label-hover-bg-clr, #cccccc);
+            cursor: pointer;
+        }
+    </style>
+
+    <style>
+        button:hover{
+            background-color: var(--btn-hover-bg-clr, #cccccc);
+            cursor: pointer;
+        }
+    </style>
+
+
+    <div id="mode_selection_container" style="display:flex;flex-direction:column;row-gap:5px;width:300px;">
+        <fieldset class="fieldset-1">
+            <legend>Mode</legend>
+            <label>
+                <input id="singleModeInput" class="mode_setter" type="radio" name="agent-mode1" value="single" checked>Single
+            </label>
+            <label>
+                <input id="multipleModeInput" class="mode_setter" type="radio" name="agent-mode1" value="multiple">Multiple
+            </label>
+        </fieldset>
+
+       <fieldset class='fieldset-1'>
+            <label>
+              <input id="populateModeInput" class="mode_setter" type="radio" name="agent-mode2" value="populated" checked>Populated
+            </label>
+
+            <label>
+              <input id="storedModeInput"  class="mode_setter" type="radio" name="agent-mode2" value="localStorage">Stored
+            </label>
+        </fieldset>
+    </div>
+
+
+    <div id="brain">
+        <div>UP: <span id="upValue">0</span></div>
+        <div class="bar">
+            <div id="upBar" class="fill"></div>
+        </div>
+
+        <div>RIGHT: <span id="rightValue">0</span></div>
+        <div class="bar">
+            <div id="rightBar" class="fill"></div>
+        </div>
+
+        <div>DOWN: <span id="downValue">0</span></div>
+        <div class="bar">
+            <div id="downBar" class="fill"></div>
+        </div>
+
+        <div>LEFT: <span id="leftValue">0</span></div>
+        <div class="bar">
+            <div id="leftBar" class="fill"></div>
+        </div>
+
+        <h2 class="decision">Decision: <span id="decision">?</span></h2>
+    </div>
+
+
+
+    <script src="data.js"></script>
+
+    <script src="utils.js"></script>
+    <script src="draw utils.js"></script>
+    
+    <!-- <script src="handlers.js"></script> -->
+
+    <script src="agent.js"></script>
+    <script src="neuron.js"></script>
+    <script src="layer.js"></script>
+    <script src="network.js"></script>
+    
+    <script src="./models/Level.js"></script>
+    <script src="./models/Simulation.js"></script>
+
+    <script src="script.js"></script>
+
+    <!-- <script src="script2.js"></script> -->
+    <!-- <script src="test.js"></script> -->
+</body>
+</html>
