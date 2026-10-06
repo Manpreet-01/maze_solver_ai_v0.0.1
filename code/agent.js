@@ -9,10 +9,26 @@ class Agent {
         this.winLevels = [];
         this.wallHits = 0;
         this.steps = 0;
+        this.mutated = 0
+        this.heatMap = null;
+    }
+    resetValues(){
+        this.fitness = 0;
+        this.reached = false;
+        this.winLevels = [];
+        this.wallHits = 0;
+        this.steps = 0;
+        this.mutated = 0
     }
     setPosition(row, col){
         this.row = row;
         this.col = col;
+    }
+    getPosition(){
+        return {
+            row: this.row,
+            col: this.col
+        }
     }
     setFitness(fitness){
         this.fitness = fitness;
@@ -110,30 +126,19 @@ class Agent {
         return true;
     }
 
-    draw(ctx, label) {
+    draw(ctx, label="?") {
         const CELL_SIZE = CONFIG.CELL_SIZE
 
-        const x = this.col * CELL_SIZE;
-        const y = this.row * CELL_SIZE;
+        const x = this.col * CELL_SIZE + CELL_SIZE/2;
+        const y = this.row * CELL_SIZE + CELL_SIZE/2;
 
         ctx.fillStyle = this.color;
         ctx.beginPath();
-        ctx.arc(
-            x + CELL_SIZE / 2,
-            y + CELL_SIZE / 2,
-            CELL_SIZE / 3,
-            0,
-            Math.PI * 2
-        );
+        ctx.arc(x, y, CELL_SIZE/3, 0, Math.PI * 2);
         ctx.fill();
 
         if(label) {
-            drawLabel(
-                this.col * CELL_SIZE + CELL_SIZE/2,
-                this.row * CELL_SIZE + CELL_SIZE/2,
-                label,
-                ctx
-            )
+            drawLabel(x,y,label,ctx)
         }
     }
 }

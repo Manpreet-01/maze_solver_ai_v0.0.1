@@ -491,89 +491,89 @@ function evolve() {
 
 
 
-function watchAgentSolving_old_fun(network, animationSpeed=100) {
-    setAgentProp(network, start.row, start.col)
+// function watchAgentSolving_old_fun(network, animationSpeed=100) {
+//     setAgentProp(network, start.row, start.col)
 
-    let step = 0;
+//     let step = 0;
 
-    const timer = setInterval(function () {
-            step++;
+//     const timer = setInterval(function () {
+//             step++;
             
-            showFitnessEle.innerText = agent.fitness
-            showStepEle.innerText = step
+//             showFitnessEle.innerText = agent.fitness
+//             showStepEle.innerText = step
 
-            if (step >= MAX_STEPS) {
-                console.log("🎯 Failed to SOLVED THE MAZE! in "+ step +" steps");
-                step = 0; //reset to zero bcz mutated network starts again from zero
-                clearInterval(timer);
-                return;
-            }
+//             if (step >= MAX_STEPS) {
+//                 console.log("🎯 Failed to SOLVED THE MAZE! in "+ step +" steps");
+//                 step = 0; //reset to zero bcz mutated network starts again from zero
+//                 clearInterval(timer);
+//                 return;
+//             }
 
-            const { inputs, outputs, direction } = neuralMove(agent, maze);
+//             const { inputs, outputs, direction } = neuralMove(agent, maze);
 
-            if (reachedGoal(maze, agent)) {
-                clearInterval(timer);
-                console.log("🎯 MAZE SOLVED " + step +" steps", "animId :: ", timer);
-            }
+//             if (reachedGoal(maze, agent)) {
+//                 clearInterval(timer);
+//                 console.log("🎯 MAZE SOLVED " + step +" steps", "animId :: ", timer);
+//             }
 
-            updateUi();
-        }, animationSpeed);
+//             updateUi();
+//         }, animationSpeed);
     
-    return timer;
-}
+//     return timer;
+// }
 
 
 const collectedData = []
 
-function watchAgentSolving(network, animationSpeed=200) {
-    // console.log("solving....")
-    setAgentProp(network, start.row, start.col);
+// function watchAgentSolving(network, animationSpeed=200) {
+//     // console.log("solving....")
+//     setAgentProp(network, start.row, start.col);
 
-    const timer = setInterval(function() {            
-            showFitnessEle.innerText = agent.fitness
-            showStepsEle.innerText = agent.steps
-            wallHitsEle.innerText = agent.wallHits
-            goalReachedEle.innerText = agent.reachedGoal
-            generationEle.innerText = agent.generation
+//     const timer = setInterval(function() {            
+//             showFitnessEle.innerText = agent.fitness
+//             showStepsEle.innerText = agent.steps
+//             wallHitsEle.innerText = agent.wallHits
+//             goalReachedEle.innerText = agent.reachedGoal
+//             generationEle.innerText = agent.generation
 
-            if (agent.steps >= MAX_STEPS) {
-                clearInterval(timer);
-                console.log("🎯 Failed ");
-                if(agent.fitness > bestFitness){
-                    bestFitness = agent.fitness
-                    bestFitnessEle.innerText = bestFitness
-                    bestAgent = agent;
-                }
+//             if (agent.steps >= MAX_STEPS) {
+//                 clearInterval(timer);
+//                 console.log("🎯 Failed ");
+//                 if(agent.fitness > bestFitness){
+//                     bestFitness = agent.fitness
+//                     bestFitnessEle.innerText = bestFitness
+//                     bestAgent = agent;
+//                 }
 
-                // collectedData.push({
-                //     fitness: agent.fitness,
-                //     generation: agent.generation,
-                //     mutationRate: mutationRate,
-                // });
+//                 // collectedData.push({
+//                 //     fitness: agent.fitness,
+//                 //     generation: agent.generation,
+//                 //     mutationRate: mutationRate,
+//                 // });
 
-                agent.steps = 0;
-                agent.wallHits = 0;
-                agent.fitness = 0;
+//                 agent.steps = 0;
+//                 agent.wallHits = 0;
+//                 agent.fitness = 0;
 
-                // mutateNetwork(agent.network);
-                // agent.generation++;
+//                 // mutateNetwork(agent.network);
+//                 // agent.generation++;
 
-                // watchAgentSolving(network);
-                // return;  
-            }
+//                 // watchAgentSolving(network);
+//                 // return;  
+//             }
 
-            stepAgent(agent, maze, goal);
+//             stepAgent(agent, maze, goal);
 
-            if (agent.reachedGoal) {
-                clearInterval(timer);
-                console.log("🎯 MAZE SOLVED ", agent);
-            }
+//             if (agent.reachedGoal) {
+//                 clearInterval(timer);
+//                 console.log("🎯 MAZE SOLVED ", agent);
+//             }
 
-            updateUi();
-        }, animationSpeed);
+//             updateUi();
+//         }, animationSpeed);
 
-    return timer;
-}
+//     return timer;
+// }
 
 
 function createPopulation(size) {

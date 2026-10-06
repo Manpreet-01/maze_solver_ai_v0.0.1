@@ -169,3 +169,12 @@ function updateUi(){
     // drawConnections(agent.network,xInput,xHidden,xOutput);
     // drawNetwork(agent.network, inputs, action);
 }
+
+
+function showHeatmap(agent){    
+    heatMapEle.textContent = ""
+    
+    agent.heatMap.forEach(row => {
+        heatMapEle.textContent += "\t" + JSON.stringify(row) + "\n"
+    })
+}

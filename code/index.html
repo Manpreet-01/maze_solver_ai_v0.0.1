@@ -52,6 +52,12 @@
     </style>
 
     <div class="ui_layer">
+        
+        <fieldset>
+            <legend>Simulation</legend>
+            <div>Steps: <span id="simulationSteps">0</span></div>
+        </fieldset>
+
         <fieldset>
             <legend>Agent</legend>
             <div>Best Fitness: <span id="bestFitnessEle">-</span></div>
@@ -79,10 +85,15 @@
             <div>Count: <span id="agentCountFromPopulatedEle">-</span></div>
         </fieldset>
 
-        <fieldset>
+        <fieldset style="display: flex;flex-direction: column; row-gap: 5px;">
             <legend>Level</legend>
-            <div>Level: <span id="levelEle">-</span></div>
-            <div>Count: <span id="levelCountEle">-</span></div>
+
+            <div>Levels: <span id="levelsEle">-</span></div>
+
+            <div style="display:flex; column-gap: 15px;">
+                <div>Level: <span id="levelEle">-</span></div>
+                <div>Winners: <span id="winnersCountEle">-</span></div>
+            </div>
         </fieldset>
     </div>
 
@@ -206,6 +217,36 @@
     </div>
 
 
+    <!-- <div>
+        <fieldset style="border: 1px solid lightyellow; min-height: 200px;">
+            <legend>Terminal</legend>
+            <div id="terminalEle"></div>
+        </fieldset>
+    </div> -->
+
+
+    <div id='heatMapEle' style=""></div>
+
+
+    <style>
+        #mazeCanvas2{
+            display: none;
+        }
+        div.btn-container {
+            display: none;
+        }
+        div#mode_selection_container{
+            display: none !important;
+        }
+        #brain{
+            display: none;
+        }
+        #heatMapEle {
+            color: brown;
+            white-space: pre;
+        }
+    </style>
+
 
     <script src="data.js"></script>
 
@@ -222,7 +263,7 @@
     <script src="./models/Level.js"></script>
     <script src="./models/Simulation.js"></script>
 
-    <script src="script.js"></script>
+    <script src="script.mjs"></script>
 
     <!-- <script src="script2.js"></script> -->
     <!-- <script src="test.js"></script> -->
