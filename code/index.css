@@ -1,0 +1,125 @@
+:root {
+    --btn-hover-bg-clr: #007bff; /* Variables must start with two dashes -- */
+    --fieldset-label-hover-bg-clr: #007bff;
+}
+
+body {
+    background: #222;
+    color: white;
+    font-family: Arial;
+    margin: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+}
+        #brain {
+            width: 480px;
+            margin: 0px;
+            margin-top: 10px;
+            margin-left: 10px;
+            text-align: left;
+            font-family: monospace;
+        }
+
+        .bar {
+            height: 10px;
+            background: #555;
+            margin: 5px 0 10px;
+        }
+
+        .fill {
+            height: 100%;
+            background: limegreen;
+            width: 0%;
+        }
+        .ui_layer {
+            position: absolute;
+            right: 0;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            row-gap: 5px;
+            text-align: left;
+        }
+
+
+        div.btn-container{
+            display:flex;
+            justify-content:space-between;
+            /*width:35vw;*/
+            min-width:400px;
+            background: black;
+        }
+        h2.decision {
+            margin: 0;
+            font-size: 15px;
+        }
+
+
+        fieldset.fieldset-1 {
+            border: 1px solid rgba(255, 255, 255, 1);
+            display: flex;
+            column-gap: 5px;
+        }
+        fieldset.fieldset-1 label {
+            padding: 0px 4px;
+            border-radius: 4px;
+        }
+        fieldset.fieldset-1 label:hover {
+            background-color: var(--fieldset-label-hover-bg-clr, #cccccc);
+            cursor: pointer;
+        }
+        button:hover{
+            background-color: var(--btn-hover-bg-clr, #cccccc);
+            cursor: pointer;
+        }
+
+
+
+        div.mazecanvases{
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+        }
+
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            margin: 0;
+            padding: 0;
+        }
+
+        div.mazecanvases{
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+        }
+
+        #mazeCanvas2 {
+            display: none;
+        }
+
+
+        div.btn-container {
+            display: none;
+        }
+        div#mode_selection_container{
+            display: none !important;
+        }
+        #brain{
+            display: none;
+        }
+        #heatMapEle {
+            color: brown;
+            white-space: pre;
+        }
+
+
+
+        fieldset.level_fieldset {
+            display: flex;flex-direction: column; row-gap: 5px;
+        }
+
+        div.fieldset_div{
+            display:flex;
+            column-gap: 15px;
+        }

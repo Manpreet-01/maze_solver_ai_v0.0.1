@@ -3,121 +3,17 @@
 <head>
     <title>Neural Maze</title>
     <script>const l = console.log;// console.log manipulation here</script>
-    <style>
-        body {
-            background: #222;
-            color: white;
-            font-family: Arial;
-            margin: 0;
-/*            text-align: center;*/
-        }
-
-        canvas {
-            border: 1px solid white;
-            margin-top: 0px;
-        }
-        #brain {
-            width: 480px;
-            margin: 0px;
-            margin-top: 10px;
-            margin-left: 10px;
-            text-align: left;
-            font-family: monospace;
-        }
-
-        .bar {
-            height: 10px;
-            background: #555;
-            margin: 5px 0 10px;
-        }
-
-        .fill {
-            height: 100%;
-            background: limegreen;
-            width: 0%;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="./index.css">
 </head>
 
 <body>
-    <style type="text/css">
-        .ui_layer {
-            position: absolute;
-            right: 0;
-            font-size: 10px;
-            display: flex;
-            flex-direction: column;
-            row-gap: 5px;
-        }
-    </style>
 
-    <div class="ui_layer">
-        
-        <fieldset>
-            <legend>Simulation</legend>
-            <div>Steps: <span id="simulationSteps">0</span></div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Agent</legend>
-            <div>Best Fitness: <span id="bestFitnessEle">-</span></div>
-            <div>Fitness: <span id="showFitnessEle">-</span></div>
-            <div>Steps: <span id="showStepsEle">-</span></div>
-            <div>Wall hits: <span id="wallHitsEle">-</span></div>
-            <div>Goal Reached: <span id="goalReachedEle">-</span></div>
-        </fieldset>
-        
-        <fieldset>
-            <legend>Evolution</legend>
-            <div>Generation: <span id="generationEle">-</span></div>
-            <div>Mutation Rate: <span id="mutationRateEle">-</span></div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Local Storage</legend>
-            <div>Agent Index: <span id="agentIndexFromLocalStorageEle">-</span></div>
-            <div>Count: <span id="agentCountFromLocalStorageEle">-</span></div>
-        </fieldset>
-
-        <fieldset>
-            <legend>Populated</legend>
-            <div>Agent Index: <span id="agentIndexFromPopulatedEle">-</span></div>
-            <div>Count: <span id="agentCountFromPopulatedEle">-</span></div>
-        </fieldset>
-
-        <fieldset style="display: flex;flex-direction: column; row-gap: 5px;">
-            <legend>Level</legend>
-
-            <div>Levels: <span id="levelsEle">-</span></div>
-
-            <div style="display:flex; column-gap: 15px;">
-                <div>Level: <span id="levelEle">-</span></div>
-                <div>Winners: <span id="winnersCountEle">-</span></div>
-            </div>
-        </fieldset>
+    <div class='mazecanvases'>
+        <canvas id='mazeCanvas'></canvas>
+        <canvas id='mazeCanvas2'></canvas>
+        <canvas id='mazeCanvas3'></canvas>
     </div>
 
-
-
-    <canvas id='mazeCanvas'></canvas>
-    <canvas id='mazeCanvas2'></canvas>
-    
-
-    <br>
-
-    <style>
-        div.btn-container{
-            display:flex;
-            justify-content:space-between;
-            /*width:35vw;*/
-            min-width:400px;
-            background: black;
-        }
-        h2.decision {
-            margin: 0;
-            font-size: 15px;
-        }
-    </style>
 
     <div class='btn-container'>
         <div>
@@ -138,35 +34,6 @@
 
         </div>
     </div>
-
-
-    <style>
-        :root {
-            --btn-hover-bg-clr: #007bff; /* Variables must start with two dashes -- */
-            --fieldset-label-hover-bg-clr: #007bff;
-        }
-
-        fieldset.fieldset-1 {
-            border: 1px solid rgba(255, 255, 255, 1);
-            display: flex;
-            column-gap: 5px;
-        }
-        fieldset.fieldset-1 label {
-            padding: 0px 4px;
-            border-radius: 4px;
-        }
-        fieldset.fieldset-1 label:hover {
-            background-color: var(--fieldset-label-hover-bg-clr, #cccccc);
-            cursor: pointer;
-        }
-    </style>
-
-    <style>
-        button:hover{
-            background-color: var(--btn-hover-bg-clr, #cccccc);
-            cursor: pointer;
-        }
-    </style>
 
 
     <div id="mode_selection_container" style="display:flex;flex-direction:column;row-gap:5px;width:300px;">
@@ -217,7 +84,67 @@
     </div>
 
 
-    <!-- <div>
+
+        <div class="ui_layer">
+        
+        <fieldset>
+            <legend>Simulation</legend>
+            <div>Steps: <span id="simulationSteps">0</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Agent</legend>
+            <div>Best Fitness: <span id="bestFitnessEle">-</span></div>
+            <div>Fitness: <span id="showFitnessEle">-</span></div>
+            <div>Steps: <span id="showStepsEle">-</span></div>
+            <div>Wall hits: <span id="wallHitsEle">-</span></div>
+            <div>Goal Reached: <span id="goalReachedEle">-</span></div>
+        </fieldset>
+        
+        <fieldset>
+            <legend>Evolution</legend>
+            <div>Generation: <span id="generationEle">-</span></div>
+            <div>Mutation Rate: <span id="mutationRateEle">-</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Local Storage</legend>
+            <div>Agent Index: <span id="agentIndexFromLocalStorageEle">-</span></div>
+            <div>Count: <span id="agentCountFromLocalStorageEle">-</span></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Populated</legend>
+            <div>Agent Index: <span id="agentIndexFromPopulatedEle">-</span></div>
+            <div>Count: <span id="agentCountFromPopulatedEle">-</span></div>
+        </fieldset>
+
+        <fieldset class="level_fieldset">
+            <legend>Level</legend>
+
+            <div>Levels: <span id="levelsEle">-</span></div>
+
+            <div class='fieldset_div'>
+                <div>Level: <span id="levelEle">-</span></div>
+                <div>Winners: <span id="winnersCountEle">-</span></div>
+            </div>
+        </fieldset>
+
+        <fieldset class="agent_position_fieldset">
+            <legend>Position</legend>
+
+            <div id="agent_position_fieldset_div"></div>
+
+        </fieldset>
+
+
+    </div>
+
+
+
+    <div id='heatMapEle' style=""></div>
+
+        <!-- <div>
         <fieldset style="border: 1px solid lightyellow; min-height: 200px;">
             <legend>Terminal</legend>
             <div id="terminalEle"></div>
@@ -225,27 +152,6 @@
     </div> -->
 
 
-    <div id='heatMapEle' style=""></div>
-
-
-    <style>
-        #mazeCanvas2{
-            display: none;
-        }
-        div.btn-container {
-            display: none;
-        }
-        div#mode_selection_container{
-            display: none !important;
-        }
-        #brain{
-            display: none;
-        }
-        #heatMapEle {
-            color: brown;
-            white-space: pre;
-        }
-    </style>
 
 
     <script src="data.js"></script>

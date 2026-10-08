@@ -35,6 +35,14 @@ function getRandomColor(opacity=1){
     return `rgba(${random()*255}, ${random()*255}, ${random()*255}, ${opacity})`
 }
 
+
+function getHeatColor(intensity) {
+    const hue = (1 - intensity) * 240;
+
+    return `hsl(${hue}, 100%, 50%)`;
+}
+
+
 function sleep(ms) {
     return new Promise(resolve => {
         setTimeout(resolve, ms);

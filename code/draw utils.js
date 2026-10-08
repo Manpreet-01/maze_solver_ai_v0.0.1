@@ -171,10 +171,35 @@ function updateUi(){
 }
 
 
-function showHeatmap(agent){    
+function showHeatMapInDOM(agent){    
     heatMapEle.textContent = ""
     
     agent.heatMap.forEach(row => {
         heatMapEle.textContent += "\t" + JSON.stringify(row) + "\n"
     })
+}
+
+
+function showHeatMap(agent, ctx){
+    const heatMap = agent.heatMap;
+    
+    const max = Math.max(...heatMap.flat())
+    if (max == 0) return;
+
+    for (row in heatMap){
+        for(col in heatMap[0]){
+            const visits = heatMap[row][col]
+            if (visits === 0) continue;
+
+            const intensity = Math.log1p(visits) / Math.log1p(max); // Logarithmic normalization
+
+            const x = col * CONFIG.CELL_SIZE
+            const y = row * CONFIG.CELL_SIZE
+
+            ctx.fillStyle = `rgba(255, 0, 0, ${intensity})`
+            // ctx.fillStyle = getHeatColor(intensity);
+
+            ctx.fillRect(x, y, CONFIG.CELL_SIZE-1, CONFIG.CELL_SIZE-1);
+        }
+    }
 }

@@ -19,6 +19,7 @@ class Agent {
         this.wallHits = 0;
         this.steps = 0;
         this.mutated = 0
+        // this.heatMap = null;  // create a heatmap filled with zeros
     }
     setPosition(row, col){
         this.row = row;
