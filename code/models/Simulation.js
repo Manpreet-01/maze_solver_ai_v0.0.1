@@ -7,7 +7,7 @@ class Simulation {
         this.level = null;
         this.population = [];
         this.generation = 0;
-        this.bestFitness = -Infinity;
+        this.bestFitness = 0;
         this.bestAgent = null;
         this.agentIdx = 0
         this.idx = 0
@@ -16,11 +16,10 @@ class Simulation {
         this.resetPopulation();
     }
     pushRandomAgent() {
-        const agent = new Agent(this.level.start.row, this.level.start.col);
+        const agent = new Agent(this.level.start.row, this.level.start.col, getRandomColor());
         agent.network.mutate(0.1)
         agent.heatMap = this.createAgentsHeatMap(agent, this.level)
         this.population.push(agent);
-        return this.population.length;
     }
     pushRandomAgentsUpToPopulationSize() {
         while(simulation.population.length < CONFIG.POPULATION_SIZE) {
@@ -88,11 +87,26 @@ class Simulation {
                 this.bestFitness = agent.fitness;
                 this.bestAgent = agent;
             }
-            // this.handleStepPopulationAndEvolution(agent);
+            this.handleEvolution(agent);
         }
         return isLevelSolvedByAnyAgent;
     }
-    handleStepPopulationAndEvolution(agent) {
+
+    handleEvolution(agent) {
+        if(agent.fitness<CONFIG.NEGATIVE_FITNESS_THRESHOLD){
+            random() > 0.5
+                ? agent.network.mutate(0.1)
+                : agent.network.mutate(-0.1)
+
+            if(random() > 0.5) agent.network = new Network();
+            
+            agent.row = this.level.start.row
+            agent.col = this.level.start.col
+            agent.resetValues()
+            this.createAgentsHeatMap(agent, this.level)
+            agent.generation++
+        }
+
         // if(
         // agent.steps>CONFIG.MAX_STEPS ||
         // agent.fitness<CONFIG.NEGATIVE_FITNESS_THRESHOLD ||
@@ -120,8 +134,7 @@ class Simulation {
     }
     drawAgents() {
         for (const agentIndex in this.population) {
-            // draw all agents
-            const agent = this.population[agentIndex]
+            const agent = this.population[agentIndex]   
             agent.draw(this.ctx, agentIndex)
         }
     }
@@ -129,7 +142,7 @@ class Simulation {
         this.clearCanvas();
         this.drawLevel();
         this.drawAgents();
-        this.renderDom();
+        // this.renderDom();
     }
     renderDom() {
         // agent
@@ -203,9 +216,9 @@ class Simulation {
     }
     saveElites() {
         // filter winners and sort them by no. of winLevels
-        const sortedWinners =
-        this.getWinners()
-        .sort((a,b) => b.winLevels.length - a.winLevels.length);
+        const sortedWinners = this.getWinners()
+            .sort((a,b) => b.winLevels.length - a.winLevels.length);
+
         this.elites = sortedWinners.slice(0, CONFIG.ELITE_COUNT);
         return this.elites;
     }

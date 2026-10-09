@@ -93,28 +93,28 @@ function reachedGoal(maze, agent) {
 function calculateReward(oldDistance,newDistance,moved,reachedGoal) {
     let reward = 0;
 
-    // Every step costs something
-    reward -= 1;
+    // reward -= 1;    // Every step costs something
 
-    // Wall collision or not moving 
-    if (!moved || newDistance === oldDistance) {
-        reward -= 5;
+    
+    if (!moved || newDistance === oldDistance) {    // Wall collision or not moving 
+        reward -= 150;
     }
 
-    // Small progress reward
-    if (newDistance < oldDistance) {
-        reward += 10;
+    if (moved || newDistance !== oldDistance) {    // on moving give reward
+        reward += 50;
     }
 
-    // Small penalty for moving away
-    if (newDistance > oldDistance) {
-        reward -= 10;
-    }
+    // if (newDistance < oldDistance) {    // Small progress reward
+        // reward += 10;
+    // }
 
-    // HUGE reward for solving
-    if (reachedGoal) {
-        reward += 1000;
-    }
+    // if (newDistance > oldDistance) {    // Small penalty for moving away
+        // reward -= 10;
+    // }
+
+    // if (reachedGoal) {   // HUGE reward for solving
+        // reward += 100;
+    // }
 
     return reward;
 }
@@ -140,7 +140,7 @@ function runBrain(network, maze) {
     const start = findCharacter(maze, "S");
     const goal = findCharacter(maze, "G");
 
-    const agent = new Agent(start.row, start.col);
+    const agent = new Agent(start.row, start.col, getRandomColor());
 
     let fitness = 0;
 
@@ -589,7 +589,7 @@ function createPopulation(size) {
     const start = findCharacter(maze, "S");
 
     for (let i = 0; i < size; i++) {
-         population.push(new Agent(start.row, start.col));
+         population.push(new Agent(start.row, start.col, getRandomColor()));
     }
 
     return population;

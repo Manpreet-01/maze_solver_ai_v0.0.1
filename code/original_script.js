@@ -6,8 +6,8 @@ const CELL_SIZE = 60;
 let network = new Network();
 let generation = 0;
 let bestNetwork = null;
-let fitness = Infinity;
-let bestFitness = -Infinity;
+let fitness = 0;
+let bestFitness = 0;
 let animationId = 0;
 
 let stepCount = 0;
@@ -21,7 +21,8 @@ const start = findCharacter(maze, "S");
 
 const agent = new Agent(
     start.row,
-    start.col
+    start.col,
+    getRandomColor(),
 );
 
 const canvas = document.getElementById("mazeCanvas");

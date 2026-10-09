@@ -5,9 +5,7 @@ class Layer {
         this.neurons = [];
 
         for (let i = 0; i < neuronCount; i++) {
-            this.neurons.push(
-                new Neuron(inputCount)
-            );
+            this.neurons.push(new Neuron(inputCount));
         }
     }
 
@@ -17,9 +15,7 @@ class Layer {
         const outputs = [];
 
         for (const neuron of this.neurons) {
-            outputs.push(
-                neuron.activate(inputs)
-            );
+            outputs.push(neuron.activate(inputs));
         }
 
         return outputs;

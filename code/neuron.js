@@ -19,7 +19,7 @@ class Neuron {
         }
 
         this.bias += (random() * 2 - 1) * amount;
-        this.output += (random() * 2 - 1) * amount;
+        // this.output += (random() * 2 - 1) * amount;
     }
 
     clone() {
@@ -27,7 +27,7 @@ class Neuron {
 
         copy.weights = [...this.weights];
         copy.bias = this.bias;
-        copy.output = this.output;
+        // copy.output = this.output;
 
         return copy;
     }

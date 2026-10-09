@@ -32,7 +32,7 @@ agentCountFromPopulatedEle.innerText = population.length;
 const goal = findCharacter(maze, 'G');
 const start = findCharacter(maze, "S");
 
-const agent = new Agent(start.row, start.col);
+const agent = new Agent(start.row, start.col, getRandomColor());
 
 const restoreNetworkFromLocalStorage = false;
 

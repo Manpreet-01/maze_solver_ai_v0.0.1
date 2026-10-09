@@ -2,14 +2,14 @@ class Agent {
     constructor(row=0, col=0, color, network) {
         this.row = row;
         this.col = col;
-        this.fitness = 0;
+        this.fitness = 0
         this.color = color ? color : getRandomColor();
         this.network = network ? network : new Network();
         this.reached = false;
         this.winLevels = [];
         this.wallHits = 0;
         this.steps = 0;
-        this.mutated = 0
+        this.generation = 0
         this.heatMap = null;
     }
     resetValues(){
@@ -18,7 +18,7 @@ class Agent {
         this.winLevels = [];
         this.wallHits = 0;
         this.steps = 0;
-        this.mutated = 0
+        this.generation = 0
         // this.heatMap = null;  // create a heatmap filled with zeros
     }
     setPosition(row, col){
