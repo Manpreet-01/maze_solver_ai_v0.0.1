@@ -3,13 +3,13 @@ const CONFIG = {			// --- CONFIG & CONSTANTS ---
   MAX_STEPS: 200,
   ELITE_COUNT: 20,
   MUTATION_RATE: 0.1,
-  POPULATION_SIZE: 1000,
+  POPULATION_SIZE: 10,
   LOOPINGTHRESHOLD: 20,
   HEATMAPTHRESHOLD: 30,
   NEGATIVE_FITNESS_THRESHOLD: -1000,
 };
 
-const simulation = new Simulation('mazeCanvas', mazes, 3);
+const simulation = new Simulation('mazeCanvas', mazes, 4);
 
 const canvas3 = document.getElementById("mazeCanvas3");
 const ctx3 = canvas3.getContext("2d");
