@@ -1,4 +1,4 @@
-class Level {
+class MazeLevel {
     constructor(mazeData) {
         this.grid = mazeData;
         this.start = findCharacter(mazeData, 'S');

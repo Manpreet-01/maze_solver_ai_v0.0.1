@@ -1,4 +1,4 @@
-class Network {
+class Network_old {
     constructor() {
         this.hidden = new Layer(4, 5);      // 4 sensors or weights and 5 neurons
         this.output = new Layer(5, 4);  // 5 weights and 4 neurons for 4 outputs

@@ -4,7 +4,7 @@ class Agent {
         this.col = col;
         this.fitness = 0
         this.color = color ? color : getRandomColor();
-        this.network = network ? network : new Network();
+        this.network = network ? network : getNewNetwork();
         this.reached = false;
         this.winLevels = [];
         this.wallHits = 0;
@@ -74,12 +74,13 @@ class Agent {
     step (level, levelIndex) {
         if (this.reached){
             console.log("agent step stricted, debug this");
-            return true;
+            // return true;
         }
 
         const maze = level.grid;
+
         const inputs = this.sense(maze);
-        const outputs = this.network.predict(inputs);
+        const outputs = NeuralNetwork.feedForward(inputs, this.network);
 
         const action = chooseAction(outputs);
         const direction = actionNames[action];
@@ -100,6 +101,9 @@ class Agent {
         if (this.reached) {
             this.winLevels.push(levelIndex);
             this.winLevels = Array.from(new Set(this.winLevels)); // to avoiding duplicates
+
+            simulation.winners.push(this)
+            simulation.winners = Array.from(new Set(simulation.winners))
         }
         
         this.steps++;
@@ -119,7 +123,18 @@ class Agent {
         const newRow = this.row + dr;
         const newCol = this.col + dc;
 
-        if (maze[newRow][newCol] === "#") return false;
+        if(
+            newRow < 0 || newRow >= maze.length ||
+            newCol < 0 || newCol >= maze[0].length
+        ) {
+            return false;
+        }
+
+        const row = maze[newRow]
+        if(!row) return false;
+
+        const cell = maze[newRow][newCol];
+        if (cell === "#" || cell === undefined) return false;
 
         this.row = newRow;
         this.col = newCol;

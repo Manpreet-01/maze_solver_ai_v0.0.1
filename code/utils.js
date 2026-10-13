@@ -81,27 +81,50 @@ function isWall(maze, row, col) {
     return maze[row][col] === "#";
 }
 
-function distanceToGoal(agent, goal) {
+function distanceToGoal_old(agent, goal) {
     // Manhattan distance.
     return Math.abs(agent.row - goal.row) + Math.abs(agent.col - goal.col);
 }
 
+function distanceToGoal(agent, goal) {
+    const x = agent.col - goal.col
+    const y = agent.row - goal.row
+
+    return Math.sqrt(x*x + y*y);
+}
+
 function reachedGoal(maze, agent) {
-    return maze[agent.row][agent.col] === "G";
+    const agentRow = agent.row;
+    const agentCol = agent.col;
+
+    if(
+        agentRow < 0 || agentRow >= maze.length ||
+        agentCol < 0 || agentCol >= maze[0].length
+    ) {
+            return false;
+    }
+
+    const row = maze[agentRow]
+    if(!row) return false;
+
+    const cell = maze[agentRow][agentCol];
+    if (cell === "#" || cell === undefined) return false;
+
+    return cell === "G";
 }
 
 function calculateReward(oldDistance,newDistance,moved,reachedGoal) {
     let reward = 0;
 
-    // reward -= 1;    // Every step costs something
+    reward -= 1;    // Every step costs something
 
     
-    if (!moved || newDistance === oldDistance) {    // Wall collision or not moving 
-        reward -= 150;
+    if (!moved && newDistance === oldDistance) {    // Wall collision or not moving 
+        reward -= 15;
     }
 
-    if (moved || newDistance !== oldDistance) {    // on moving give reward
-        reward += 50;
+    if (moved && newDistance <= oldDistance) {    // on moving give reward
+        reward += 2;
     }
 
     // if (newDistance < oldDistance) {    // Small progress reward
@@ -384,48 +407,6 @@ function evaluatePopulation() {
     return results;
 }
 
-
-function restoreLayer(layer, savedLayer) {
-
-    for (let n = 0; n < layer.neurons.length; n++) {
-
-        const neuron = layer.neurons[n];
-        const savedNeuron = savedLayer.neurons[n];
-
-        for (let i = 0; i < neuron.weights.length; i++) {
-            neuron.weights[i] = savedNeuron.weights[i];
-        }
-
-        neuron.bias = savedNeuron.bias;
-        neuron.output = savedNeuron.output;
-    }
-}
-
-
-function getNetworkFromLocalStorage(index) {
-    const savednet = JSON.parse(localStorage.getItem("networks"))[index];
-    const network = new Network();
-
-    if(!savednet) {
-        alert("failed to get network data from localStorage");
-        return network;     // return new random network data
-    }
-
-
-    restoreLayer(network.hidden,savednet.hidden);
-    restoreLayer(network.output,savednet.output);
-
-    return network;
-}
-
-function getNetworkFromParsedObj(parsedObj) {
-    const network = new Network();
-
-    restoreLayer(network.hidden, parsedObj.hidden);
-    restoreLayer(network.output, parsedObj.output);
-
-    return network;
-}
 
 
 function mutateNetwork(network, mutationRate = 0.1) {

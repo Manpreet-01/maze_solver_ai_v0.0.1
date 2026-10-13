@@ -10,14 +10,14 @@ class Simulation {
         this.bestFitness = 0;
         this.bestAgent = null;
         this.agentIdx = 0
-        this.idx = 0
+        this.winners = [];
         this.loadLevel(this.currentLevelIndex);
         this.loadRandomPopulation();
         this.resetPopulation();
     }
     pushRandomAgent() {
         const agent = new Agent(this.level.start.row, this.level.start.col, getRandomColor());
-        agent.network.mutate(0.1)
+        // agent.network.mutate(0.1)
         agent.heatMap = this.createAgentsHeatMap(agent, this.level)
         this.population.push(agent);
     }
@@ -33,7 +33,7 @@ class Simulation {
     }
     loadLevel(index) {
         this.currentLevelIndex = index;
-        this.level = new Level(this.mazes[index]);
+        this.level = new MazeLevel(this.mazes[index]);
         // Resize canvas based on level dimensions
         this.canvas.width = this.level.cols * CONFIG.CELL_SIZE;
         this.canvas.height = this.level.rows * CONFIG.CELL_SIZE;
@@ -87,7 +87,7 @@ class Simulation {
                 this.bestFitness = agent.fitness;
                 this.bestAgent = agent;
             }
-            this.handleEvolution(agent);
+            // this.handleEvolution(agent);
         }
         return isLevelSolvedByAnyAgent;
     }
@@ -98,7 +98,7 @@ class Simulation {
                 ? agent.network.mutate(0.1)
                 : agent.network.mutate(-0.1)
 
-            if(random() > 0.5) agent.network = new Network();
+            if(random() > 0.5) agent.network = getNewNetwork();
             
             agent.row = this.level.start.row
             agent.col = this.level.start.col
@@ -172,45 +172,55 @@ class Simulation {
             console.log("-- agents solved level", this.currentLevelIndex);
         }
     }
+    
     runAllLevels() {
-        for(let i=0;
-        i<this.mazes.length;
-        i++) {
+        for(let i=0; i<this.mazes.length; i++) {
             this.runLevel(i);
         }
     }
-    watchAgentSolving(agent, animationSpeed=500) {
-        agent.setPosition(this.level.start.row, this.level.start.col);
+
+
+
+watchAgentSolving(agent, animationSpeed = 500) {
+    agent.setPosition(this.level.start.row, this.level.start.col);
+
+    return new Promise((resolve) => {
         const timer = setInterval(() => {
-            if (agent.reached) {
+            if (agent.reached || agent.steps >= CONFIG.MAX_STEPS) {
                 clearInterval(timer);
-                console.log("🎯 MAZE SOLVED ", agent);
-                this.idx++
-            }
-            else if (agent.steps >= CONFIG.MAX_STEPS) {
-                clearInterval(timer);
-                console.log("🎯 Failed ");
-                agent.steps = 0;
-                this.idx++
+
+                if (agent.reached) {
+                    console.log("🎯 MAZE SOLVED", agent);
+                } else {
+                    console.log("❌ Failed");
+                    agent.steps = 0;
+                }
+
+                resolve(); // Tell await that this agent has finished
                 return;
             }
-            if(agent.fitness > this.bestFitness) {
+
+            if (agent.fitness > this.bestFitness) {
                 this.bestAgent = agent;
-                this.bestFitness = agent.fitness
-                bestFitnessEle.innerText = this.bestFitness
+                this.bestFitness = agent.fitness;
+                bestFitnessEle.innerText = this.bestFitness;
             }
+
             agent.step(this.level, this.currentLevelIndex);
-            // showFitnessEle.innerText = agent.fitness
-            // showStepsEle.innerText = agent.steps
-            // wallHitsEle.innerText = agent.wallHits
-            // goalReachedEle.innerText = agent.reached
-            // generationEle.innerText = agent.generation
+
+                // showFitnessEle.innerText = agent.fitness
+                // showStepsEle.innerText = agent.steps
+                // wallHitsEle.innerText = agent.wallHits
+                // goalReachedEle.innerText = agent.reached
+                // generationEle.innerText = agent.generation
+
+
             this.draw();
             agent.draw(this.ctx, "W");
-        }
-        , animationSpeed);
-        return timer;
-    }
+        }, animationSpeed);
+    });
+}
+
     getWinners() {
         return this.population.filter(a => a.winLevels.length > 0);
     }

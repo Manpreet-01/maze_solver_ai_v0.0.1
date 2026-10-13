@@ -3,13 +3,14 @@ const CONFIG = {			// --- CONFIG & CONSTANTS ---
   MAX_STEPS: 200,
   ELITE_COUNT: 20,
   MUTATION_RATE: 0.1,
-  POPULATION_SIZE: 10,
+  POPULATION_SIZE: 5,
   LOOPINGTHRESHOLD: 20,
   HEATMAPTHRESHOLD: 30,
   NEGATIVE_FITNESS_THRESHOLD: -1000,
 };
 
-const simulation = new Simulation('mazeCanvas', mazes, 4);
+const simulation = new Simulation('mazeCanvas', mazes, 3);
+simulation.runAllLevels();
 
 const canvas3 = document.getElementById("mazeCanvas3");
 const ctx3 = canvas3.getContext("2d");
@@ -18,7 +19,21 @@ canvas3.width = CONFIG.CELL_SIZE * simulation.level.rows
 canvas3.height = CONFIG.CELL_SIZE * simulation.level.cols
 
 
-const intId = setInterval(step, 250)
+function getNewNetwork(){
+  return new NeuralNetwork([4,8,4]);
+}
+
+
+// const intId = setInterval(e => {
+//   try{
+//     step()
+//   }
+//   catch(e) {
+//     clearInterval(intId);
+//     console.error('program terminated')
+//     console.error(e);
+//   }
+// }, 1000)
 
 
 function saveAgentToLocalStorage(agent){
@@ -48,40 +63,42 @@ function getAgentsFromLocalStorage(){
         console.error("No agents found in localStorage")
     }
 
-    simulation.population = restoredAgents.map(restoreAgent);
+    const agents = restoredAgents.map(getAgentFromAgentObj);
+    // simulation.population = agents;
+    return agents;
 }
 
-function restoreAgent(data) {
-    const agent = Object.assign(new Agent(), data);
-    const network = Object.assign(new Network(), data.network);
-
-    network.hidden = Object.assign(new Layer(0, 0), data.network.hidden);
-    network.output = Object.assign(new Layer(0, 0), data.network.output);
-
-    network.hidden.neurons = data.network.hidden.neurons.map(
-        neuronData => Object.assign( new Neuron(0), neuronData)
-    );
-
-    network.output.neurons = data.network.output.neurons.map(
-        neuronData => Object.assign( new Neuron(0), neuronData)
-    );
-
-    agent.network = network;
+function getAgentFromAgentObj(agentObj) {
+    const agent = Object.assign(new Agent(), agentObj);
+    agent.network = Object.assign(getNewNetwork(), agentObj.network)
+    
+    const levels = agentObj.network.levels
+    
+    for (let i in agentObj.network.levels){
+        const newLevel = new Level(levels[i].inputs.length, levels[i].outputs.length);
+        agent.network.levels[i] = Object.assign(newLevel, levels[i])
+    }
+    
     return agent;
 }
 
 
-async function runAllLocalStorageAgents(){
-    const agents = JSON.parse(localStorage.getItem("agents")) || [];
-    agentCountFromLocalStorageEle.innerText = agents.length
+async function runAllLocalStorageAgents() {
+    const agents = getAgentsFromLocalStorage();
+    simulation.population = agents;
+    simulation.resetPopulation();
 
-    for (const i in agents){
-        agentIndexFromLocalStorageEle.innerText = i
-        watchAgentSolving(getNetworkFromLocalStorage(i));
-        await sleep(500);
+    agentCountFromLocalStorageEle.innerText = agents.length;
+
+
+    for (let i = 0; i < agents.length; i++) {
+        agentIndexFromLocalStorageEle.innerText = i;
+
+        await simulation.watchAgentSolving(agents[i], 250);
+        await sleep(1000);
     }
-
 }
+
 
 function cutLocalStorageNetworksArray(index){
     if(!index || typeof index != 'number')return;
@@ -113,21 +130,23 @@ window.onkeypress = (a) => {
 function step(){
   simulation.stepPopulationAndEvolve()
 
-  if(!simulation.population.length){            // all died, so try new mutated agents
-    simulation.pushRandomAgentsUpToPopulationSize();
+  // if(!simulation.population.length){            // all died, so try new mutated agents
+  //   simulation.pushRandomAgentsUpToPopulationSize();
 
-    simulation.population.forEach(a => {
-      random() > 0.5
-        ? a.network.mutate(CONFIG.MUTATION_RATE)
-        : a.network.mutate(-CONFIG.MUTATION_RATE)
+  //   simulation.population.forEach(a => {
+  //     random() > 0.5
+  //       ? a.network.mutate(CONFIG.MUTATION_RATE)
+  //       : a.network.mutate(-CONFIG.MUTATION_RATE)
       
-      a.generation++
-    });
+  //     a.generation++
+  //   });
 
-    simulation.generation++
-  }
+  //   simulation.generation++
+  // }
 	
   simulation.draw()
+  // Visualizer.drawNetwork(ctx3, simulation.population[0].network)
+  
   simulationSteps.innerText = Number(simulationSteps.innerText) + 1
   bestFitnessEle.innerText =  simulation.bestFitness
   // renderAgentsPositionsInDom()

@@ -91,18 +91,6 @@ function populateSingleMode(){
     watchAgentSolving(population[watchIndex].network);
 }
 
-function storedSingleMode(){
-    const nets = JSON.parse(localStorage.getItem("networks"))
-
-    const watchIndex = nets.length-1;
-    watchIndexInp.value = watchIndex
-}
-
-function populateMultipleMode(){}
-function storedMultipleMode(argument) {
-    // body...
-}
-
 watchBtn.onclick = function watchBtnHandler(){
     populateSingleMode();
 }
