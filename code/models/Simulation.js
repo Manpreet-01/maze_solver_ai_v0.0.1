@@ -158,19 +158,24 @@ class Simulation {
         levelsEle.innerText = this.mazes.length;
         winnersCountEle.innerText = this.population.filter(a => a.winLevels.length > 0).length;
     }
+
     runLevel(levelIndex) {
-        this.loadLevel(levelIndex);
+        this.loadLevel(levelIndex); // use this line also here
+        this.resetPopulation();
+
         let winners = 0;
+
         for (const agent of this.population) {
-            const isReached = agent.run(this.level, this.currentLevelIndex);
-            if(isReached) winners++
+            if(agent.reached){
+                console.log("already solved by this agent");
+                continue;
+            }
+
+            agent.reached = agent.run(this.level, this.currentLevelIndex);
+            if(agent.reached) winners++
         }
-        if(winners) {
-            console.log(winners + " agents solved level", this.currentLevelIndex);
-        }
-        else {
-            console.log("-- agents solved level", this.currentLevelIndex);
-        }
+
+        console.log(winners, "agents solved level", this.currentLevelIndex);
     }
     
     runAllLevels() {
